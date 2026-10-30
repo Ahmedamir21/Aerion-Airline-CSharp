@@ -1,15 +1,33 @@
 @page
 @model Aerion.Pages.Admin.ReportsModel
 @{ ViewData["Title"] = "Reports"; }
-<h2>Reports</h2>
-<div class="row g-3 mb-4">
- <div class="col-md-4"><div class="card p-3"><div class="text-muted">Revenue</div><h3>$@Model.TotalRevenue.ToString("N0")</h3></div></div>
- <div class="col-md-4"><div class="card p-3"><div class="text-muted">Confirmed bookings</div><h3>@Model.Bookings</h3></div></div>
- <div class="col-md-4"><div class="card p-3"><div class="text-muted">Cancelled bookings</div><h3>@Model.Cancelled</h3></div></div>
+<div class="section-panel">
+    <h2><i class="fas fa-chart-line"></i> Reports</h2>
+    <div class="dashboard-stats">
+        <div class="stat-card"><div class="stat-number">$@Model.TotalRevenue.ToString("N0")</div><div class="stat-label">Revenue</div></div>
+        <div class="stat-card"><div class="stat-number">@Model.Bookings</div><div class="stat-label">Confirmed bookings</div></div>
+        <div class="stat-card"><div class="stat-number">@Model.Cancelled</div><div class="stat-label">Cancelled bookings</div></div>
+    </div>
 </div>
-<h4>Revenue by route (which routes sell most)</h4>
-<table class="table"><thead><tr><th>Route</th><th>Tickets</th><th>Revenue</th></tr></thead><tbody>@foreach (var r in Model.ByRoute) { <tr><td>@r.Route</td><td>@r.Sold</td><td>$@r.Revenue.ToString("N0")</td></tr> }</tbody></table>
-<h4>How full each flight is</h4>
-<table class="table"><thead><tr><th>Flight</th><th>Route</th><th>Departs</th><th>Seats</th><th>Full</th></tr></thead><tbody>
-@foreach (var f in Model.Fill) { <tr><td>@f.Flight</td><td>@f.Route</td><td>@f.Dep.ToString("dd MMM HH:mm")</td><td>@f.Sold / @f.Total</td><td><div class="progress"><div class="progress-bar" style="width:@f.Percent.ToString("0")%">@f.Percent.ToString("0")%</div></div></td></tr> }
-</tbody></table>
+<div class="section-panel">
+    <h2>Revenue by route</h2>
+    <table>
+        <thead><tr><th>Route</th><th>Tickets</th><th>Revenue</th></tr></thead>
+        <tbody>@foreach (var r in Model.ByRoute) { <tr><td>@r.Route</td><td>@r.Sold</td><td>$@r.Revenue.ToString("N0")</td></tr> }</tbody>
+    </table>
+</div>
+<div class="section-panel">
+    <h2>How full each flight is</h2>
+    <table>
+        <thead><tr><th>Flight</th><th>Route</th><th>Departs</th><th>Seats</th><th>Full</th></tr></thead>
+        <tbody>
+        @foreach (var f in Model.Fill)
+        {
+            <tr>
+                <td>@f.Flight</td><td>@f.Route</td><td>@f.Dep.ToString("dd MMM HH:mm")</td><td>@f.Sold / @f.Total</td>
+                <td><div class="fill-bar" title="@f.Percent.ToString("0")%"><span style="width:@f.Percent.ToString("0", System.Globalization.CultureInfo.InvariantCulture)%"></span></div></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

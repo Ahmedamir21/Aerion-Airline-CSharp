@@ -2,7 +2,7 @@
 
 # Aerion - Airline Management System (C#)
 
-CSAI 202 database project. ASP.NET Core Razor Pages, C# and SQL Server through ADO.NET, with Bootstrap for the pages. Built only with what the labs covered: Razor syntax, handler methods (`OnGet`, `OnPost`, named handlers), `ViewData`, forms and tag helpers.
+CSAI 202 database project. ASP.NET Core Razor Pages, C# and SQL Server through ADO.NET, with plain HTML and CSS for the pages (same look as the first Flask version). Built only with what the labs covered: Razor syntax, handler methods (`OnGet`, `OnPost`, named handlers), `ViewData`, forms and tag helpers.
 
 ## Users
 - **Passenger**: sign up, log in, change password, search flights, pick a seat on the cabin map, pay, see and cancel bookings, change seat, see miles, track bags and report a lost bag.

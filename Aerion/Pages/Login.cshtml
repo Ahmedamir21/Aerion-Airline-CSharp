@@ -1,13 +1,29 @@
 @page
 @model LoginModel
-@{ ViewData["Title"] = "Log in"; }
-<div class="row justify-content-center"><div class="col-md-5">
-    <h2>Log in</h2>
-    <form method="post">
-        <input type="hidden" asp-for="Next" />
-        <div class="mb-3"><label class="form-label">Username</label><input asp-for="Username" class="form-control" required /></div>
-        <div class="mb-3"><label class="form-label">Password</label><input asp-for="Password" type="password" class="form-control" required /></div>
-        <button class="btn btn-primary">Log in</button>
-        <a asp-page="/Register" asp-route-next="@Model.Next" class="ms-2">Create a passenger account</a>
-    </form>
-</div></div>
+@{ ViewData["Title"] = "Sign in"; }
+<div class="auth-container">
+    <aside class="auth-aside">
+        <i class="fas fa-plane"></i>
+        <h2>Welcome back.</h2>
+        <p>Sign in to book flights, manage your trips and collect miles.</p>
+    </aside>
+    <div class="auth-box">
+        <div class="auth-header"><h2>Sign in</h2></div>
+        <form method="post" class="auth-form" autocomplete="off">
+            <input type="hidden" asp-for="Next" />
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input asp-for="Username" id="username" required maxlength="50" autocomplete="username" autofocus />
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="pw-field">
+                    <input asp-for="Password" id="password" type="password" required autocomplete="current-password" />
+                    <button type="button" class="pw-toggle" aria-label="Show password" aria-pressed="false"><i class="fas fa-eye"></i></button>
+                </div>
+            </div>
+            <button type="submit" class="btn-submit">Sign in</button>
+        </form>
+        <div class="auth-footer"><p>New here? <a asp-page="/Register" asp-route-next="@Model.Next" class="btn-link">Create a passenger account</a></p></div>
+    </div>
+</div>

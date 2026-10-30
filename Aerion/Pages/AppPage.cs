@@ -41,4 +41,7 @@ public abstract class AppPage : PageModel
     protected void Err(string message) => TempData["err"] = message;
 
     public static string Money(decimal v) => v.ToString("N2");
+
+    // CSS class for a flight status badge, e.g. "on time" -> "status-on_time".
+    public static string StatusClass(string status) => "status-" + status.Replace(' ', '_');
 }

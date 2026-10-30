@@ -1,20 +1,53 @@
 @page
 @model RegisterModel
 @{ ViewData["Title"] = "Sign up"; }
-<div class="row justify-content-center"><div class="col-md-6">
-    <h2>Create a passenger account</h2>
-    <form method="post">
-        <input type="hidden" asp-for="Next" />
-        <div class="mb-3"><label class="form-label">Full name</label><input asp-for="Name" class="form-control" required maxlength="100" /></div>
-        <div class="row">
-            <div class="col mb-3"><label class="form-label">Username</label><input asp-for="Username" class="form-control" required /></div>
-            <div class="col mb-3"><label class="form-label">Passport number</label><input asp-for="Passport" class="form-control" required /></div>
-        </div>
-        <div class="mb-3"><label class="form-label">Contact (optional)</label><input asp-for="Contact" class="form-control" /></div>
-        <div class="row">
-            <div class="col mb-3"><label class="form-label">Password</label><input asp-for="Password" type="password" class="form-control" required /></div>
-            <div class="col mb-3"><label class="form-label">Confirm password</label><input asp-for="Confirm" type="password" class="form-control" required /></div>
-        </div>
-        <button class="btn btn-primary">Sign up</button>
-    </form>
-</div></div>
+<div class="auth-container">
+    <aside class="auth-aside">
+        <i class="fas fa-plane"></i>
+        <h2>Fly with Aerion.</h2>
+        <p>Create a passenger account to book flights and collect miles.</p>
+    </aside>
+    <div class="auth-box">
+        <div class="auth-header"><h2>Sign Up</h2></div>
+        <form method="post" class="auth-form" autocomplete="off">
+            <input type="hidden" asp-for="Next" />
+            <div class="form-group">
+                <label for="name">Full name</label>
+                <input asp-for="Name" id="name" required maxlength="100" autocomplete="name" autofocus />
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input asp-for="Username" id="username" required minlength="3" maxlength="50" autocomplete="username" />
+                </div>
+                <div class="form-group">
+                    <label for="passport">Passport number</label>
+                    <input asp-for="Passport" id="passport" required maxlength="20" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="contact">Phone or email <small>(optional)</small></label>
+                <input asp-for="Contact" id="contact" maxlength="200" />
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="pw-field">
+                        <input asp-for="Password" id="password" type="password" required minlength="8" autocomplete="new-password" />
+                        <button type="button" class="pw-toggle" aria-label="Show password" aria-pressed="false"><i class="fas fa-eye"></i></button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="confirm">Confirm password</label>
+                    <div class="pw-field">
+                        <input asp-for="Confirm" id="confirm" type="password" required minlength="8" autocomplete="new-password" />
+                        <button type="button" class="pw-toggle" aria-label="Show password" aria-pressed="false"><i class="fas fa-eye"></i></button>
+                    </div>
+                </div>
+            </div>
+            <p class="help-text">At least 8 characters.</p>
+            <button type="submit" class="btn-submit">Sign Up</button>
+        </form>
+        <div class="auth-footer"><p>Already have an account? <a asp-page="/Login" asp-route-next="@Model.Next" class="btn-link">Sign in</a></p></div>
+    </div>
+</div>

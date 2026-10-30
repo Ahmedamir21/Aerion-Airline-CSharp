@@ -1,91 +1,129 @@
 @page "{id:int}"
 @model BookModel
-@{ ViewData["Title"] = "Select seats"; }
+@{
+    ViewData["Title"] = "Select seats";
+    int totalSeats = Model.Cabins.Sum(c => c.Rows.Sum(r => r.Groups.Sum(g => g.Count)));
+    int freeSeats = totalSeats - Model.Taken.Count;
+    string Price(decimal value) => value.ToString("N0");
+}
 <div class="seat-page">
-<h2>Select seats</h2>
-<p class="text-muted">@Model.FlightNumber &middot; @Model.RouteText &middot; @Model.Dep.ToString("ddd dd MMM yyyy, HH:mm") &middot; @Model.Model</p>
-<p>Price per seat: <strong>Business $@Model.Business.ToString("N2")</strong> &middot; <strong>Economy $@Model.Economy.ToString("N2")</strong></p>
-<div class="row">
- <div class="col-lg-8">
-  <div class="plane" id="plane">
-   @foreach (var cabin in Model.Cabins)
-   {
-    @if (cabin.Name == "Economy") { <div class="cabin-divider"><span>Economy cabin starts here</span></div> }
-    <div class="cabin-@cabin.Name.ToLower()">
-     <div class="cabin-title">@cabin.Name class @(cabin.Name == "Business" ? "(wide seats, extra legroom, double miles)" : "")</div>
-     @foreach (var row in cabin.Rows)
-     {
-      <div class="seat-row @(Model.ExitRows.Contains(row.Number) ? "exit" : "")">
-       <span class="row-no">@row.Number</span>
-       @foreach (var group in row.Groups)
-       {
-        <div class="seat-group">
-         @foreach (var s in group)
-         {
-          decimal price = cabin.Name == "Business" ? Model.Business : Model.Economy;
-          <button type="button" class="seat @(Model.Taken.Contains(s) ? "taken" : "")" data-seat="@s" data-price="@price" disabled="@Model.Taken.Contains(s)">@s.Last()</button>
-         }
+    <div class="seat-head">
+        <div>
+            <h2><i class="fas fa-plane"></i> Select Seats</h2>
+            <p class="muted">@Model.FlightNumber &middot; @Model.RouteText &middot; @Model.Dep.ToString("ddd dd MMM yyyy, HH:mm")</p>
+            <p class="muted">@Model.Model &middot; @freeSeats of @totalSeats seats available</p>
         </div>
-       }
-       <span class="row-no">@row.Number</span>
-      </div>
-     }
+        <div class="fare-cards">
+            <button type="button" class="fare-card biz" data-focus="business"><span>Business</span><strong>$@Price(Model.Business)</strong><small>per seat</small></button>
+            <button type="button" class="fare-card eco" data-focus="economy"><span>Economy</span><strong>$@Price(Model.Economy)</strong><small>per seat</small></button>
+        </div>
     </div>
-   }
-  </div>
- </div>
- <div class="col-lg-4"><div class="card p-3 summary">
-  <h5>Your booking</h5>
-  <ul id="sel-list" class="list-unstyled small"><li class="text-muted">No seats selected</li></ul>
-  <p>Total <strong id="sel-total">$0.00</strong></p>
-  <form method="post">
-   <input type="hidden" asp-for="Seats" id="seats-field" />
-   @if (Model.IsStaff)
-   {
-    <div class="mb-2"><label class="form-label">Passenger username</label><input asp-for="PassengerUsername" class="form-control" required /></div>
-    <p class="small text-muted">Counter booking, paid in cash.</p>
-   }
-   else
-   {
-    <div class="mb-2"><label class="form-label">Payment method</label>
-     <select asp-for="Method" class="form-select"><option value="card">Card</option><option value="cash">Cash</option><option value="bank transfer">Bank transfer</option></select></div>
-    <div class="mb-2"><label class="form-label">Loyalty miles: @Model.Miles</label>
-     @if (Model.MaxUnits > 0)
-     {
-      <select asp-for="MilesUnits" class="form-select" id="miles-units">
-       <option value="0">Do not use miles</option>
-       @for (int u = 1; u <= Model.MaxUnits; u++) { <option value="@u">Use @(u * BookingService.MilesPerDiscount) miles: @(u * BookingService.DiscountPerUnit)% off</option> }
-      </select>
-     }
-     else { <div class="small text-muted">Every @BookingService.MilesPerDiscount miles = @BookingService.DiscountPerUnit% off.</div> }
+    <p class="muted price-line">Estimated price per seat: Business $@Model.Business.ToString("N2") &middot; Economy $@Model.Economy.ToString("N2")</p>
+
+    <div class="seat-legend">
+        <span><i class="seat free biz"></i> Business</span>
+        <span><i class="seat free eco"></i> Economy</span>
+        <span><i class="seat sel"></i> Selected</span>
+        <span><i class="seat taken"></i> Taken</span>
     </div>
-   }
-   <button class="btn btn-primary w-100" id="confirm" disabled>Confirm booking</button>
-  </form>
- </div></div>
+
+    <div class="seat-layout">
+        <div class="plane" id="plane">
+            <div class="plane-nose" aria-hidden="true"></div>
+            @foreach (var cabin in Model.Cabins.Where(c => c.Rows.Count > 0))
+            {
+                bool business = cabin.Name == "Business";
+                string cabinKey = cabin.Name.ToLower();
+                decimal price = business ? Model.Business : Model.Economy;
+                if (!business)
+                {
+                    <div class="cabin-divider"><span>Economy cabin starts here &middot; standard legroom</span></div>
+                }
+                <section class="cabin @cabinKey" data-cabin="@cabinKey">
+                    <header class="cabin-title">
+                        @if (business) { <text><i class="fas fa-crown"></i> Business class <em>wide seats, extra legroom, 2x miles</em></text> }
+                        else { <text><i class="fas fa-chair"></i> Economy class <em>standard seat</em></text> }
+                    </header>
+                    <div class="seat-row letters">
+                        <span class="row-no"></span>
+                        @foreach (var group in cabin.Rows[0].Groups)
+                        {
+                            <div class="grp">@foreach (var seat in group) { <span class="letter">@seat.Last()</span> }</div>
+                        }
+                    </div>
+                    @foreach (var row in cabin.Rows)
+                    {
+                        <div class="seat-row@(Model.ExitRows.Contains(row.Number) ? " exit" : "")">
+                            <span class="row-no">@row.Number</span>
+                            @foreach (var group in row.Groups)
+                            {
+                                <div class="grp">
+                                    @foreach (var seat in group)
+                                    {
+                                        bool taken = Model.Taken.Contains(seat);
+                                        <button type="button" class="seat @(business ? "biz" : "eco") @(taken ? "taken" : "free")"
+                                                data-seat="@seat" data-price="@price" data-class="@cabinKey" disabled="@taken"
+                                                aria-label="Seat @seat @(taken ? "taken" : cabinKey)">@seat.Last()</button>
+                                    }
+                                </div>
+                            }
+                            <span class="row-no">@row.Number</span>
+                        </div>
+                    }
+                </section>
+            }
+            <div class="plane-tail" aria-hidden="true"></div>
+        </div>
+
+        <aside class="seat-summary">
+            <h3>Your booking</h3>
+            <form method="post" id="seat-form">
+                <input type="hidden" asp-for="Seats" id="seats-field" />
+                <ul id="sel-list" class="sel-list"><li class="muted">No seats selected yet</li></ul>
+                <p class="total-line">Total <strong id="sel-total">$0.00</strong></p>
+                @if (Model.IsStaff)
+                {
+                    <div class="form-group">
+                        <label for="pu">Passenger username</label>
+                        <input asp-for="PassengerUsername" id="pu" required placeholder="e.g. passenger1" />
+                    </div>
+                    <p class="muted">Counter booking: paid in cash at the desk.</p>
+                }
+                else
+                {
+                    <div class="form-group">
+                        <label for="payment-method">Payment method</label>
+                        <select asp-for="Method" id="payment-method">
+                            <option value="card">Card</option>
+                            <option value="cash">Cash</option>
+                            <option value="bank transfer">Bank transfer</option>
+                        </select>
+                    </div>
+                    <div class="form-group miles-box">
+                        <label for="miles-units">Loyalty miles: @Model.Miles</label>
+                        @if (Model.MaxUnits > 0)
+                        {
+                            <select asp-for="MilesUnits" id="miles-units">
+                                <option value="0">Do not use miles</option>
+                                @for (int u = 1; u <= Model.MaxUnits; u++)
+                                {
+                                    <option value="@u">Use @(u * BookingService.MilesPerDiscount) miles &rarr; @(u * BookingService.DiscountPerUnit)% off</option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            <small class="muted">Every @BookingService.MilesPerDiscount miles = @BookingService.DiscountPerUnit% off. Fly to earn more (business earns double).</small>
+                        }
+                    </div>
+                }
+                <button type="submit" class="btn-primary" id="confirm" disabled>Confirm booking</button>
+            </form>
+        </aside>
+    </div>
 </div>
-</div>
+
 @section Scripts {
-<script>
- var picked = {};
- var perUnit = @BookingService.DiscountPerUnit;
- function render() {
-   var keys = Object.keys(picked), sum = 0, list = document.getElementById('sel-list');
-   list.innerHTML = keys.length ? '' : '<li class="text-muted">No seats selected</li>';
-   keys.forEach(function (k) { sum += picked[k]; var li = document.createElement('li'); li.textContent = k + ': $' + picked[k].toFixed(2); list.appendChild(li); });
-   var m = document.getElementById('miles-units');
-   if (m) sum = sum * (1 - parseInt(m.value) * perUnit / 100);
-   document.getElementById('sel-total').textContent = '$' + sum.toFixed(2);
-   document.getElementById('seats-field').value = keys.join(',');
-   document.getElementById('confirm').disabled = keys.length === 0;
- }
- document.getElementById('plane').addEventListener('click', function (e) {
-   var s = e.target.closest('.seat'); if (!s || s.classList.contains('taken')) return;
-   var k = s.dataset.seat;
-   if (picked[k] !== undefined) { delete picked[k]; s.classList.remove('selected'); }
-   else if (Object.keys(picked).length < 9) { picked[k] = parseFloat(s.dataset.price); s.classList.add('selected'); }
-   render();
- });
- var mu = document.getElementById('miles-units'); if (mu) mu.addEventListener('change', render);
-</script>
+    <script>window.aerionDiscountPerUnit = @BookingService.DiscountPerUnit;</script>
+    <script src="~/js/seatmap.js" asp-append-version="true"></script>
 }

@@ -1,18 +1,102 @@
 @page
 @model IndexModel
-@{ ViewData["Title"] = "Home"; }
-<div class="p-5 mb-4 rounded text-white" style="background:#1d2b64">
-    <h1>Aerion</h1>
-    <p class="lead">Search flights, pick your exact seat, and earn miles on every trip.</p>
-    <form method="get" asp-page="/Search" class="row g-2">
-        <div class="col-md-4"><input name="origin" class="form-control" placeholder="From (optional, e.g. CAI)" /></div>
-        <div class="col-md-4"><input name="destination" class="form-control" placeholder="To (e.g. DXB)" /></div>
-        <div class="col-md-2"><input name="date" type="date" class="form-control" /></div>
-        <div class="col-md-2"><button class="btn btn-light w-100">Search</button></div>
+@{
+    ViewData["Title"] = "Home";
+    ViewData["BodyClass"] = "home";
+}
+<partial name="_Hero" />
+
+<section class="sx">
+    <div class="sx-top">
+        <span class="sx-tab"><i class="fas fa-plane"></i> Flights</span>
+        <span class="sx-trip">One way</span>
+    </div>
+    <form class="sx-form" method="get" asp-page="/Search">
+        <label class="sx-field"><span>From (optional)</span>
+            <select name="origin">
+                <option value="">Anywhere</option>
+                @foreach (var a in Model.Airports) { <option value="@a.Code">@a.City (@a.Code)</option> }
+            </select>
+        </label>
+        <button type="button" class="sx-swap" id="swap" aria-label="Swap airports"><i class="fas fa-arrow-right-arrow-left"></i></button>
+        <label class="sx-field"><span>To</span>
+            <select name="destination">
+                <option value="">Choose destination</option>
+                @foreach (var a in Model.Airports) { <option value="@a.Code">@a.City (@a.Code)</option> }
+            </select>
+        </label>
+        <label class="sx-field"><span>Depart (optional)</span>
+            <input type="date" name="date">
+        </label>
+        <button type="submit" class="btn-primary sx-go">Search flights <i class="fas fa-arrow-right"></i></button>
     </form>
-</div>
-<div class="row g-3">
-    <div class="col-md-6"><a class="text-decoration-none" asp-page="/Search" asp-route-destination="DXB"><div class="card p-4"><h4>Dubai</h4><span class="text-muted">See flights to Dubai</span></div></a></div>
-    <div class="col-md-6"><a class="text-decoration-none" asp-page="/Search" asp-route-destination="NRT"><div class="card p-4"><h4>Tokyo</h4><span class="text-muted">See flights to Tokyo</span></div></a></div>
-</div>
-<p class="mt-4 text-muted">Every 40 loyalty miles gives you 10% off your next booking. Business seats earn double miles.</p>
+</section>
+
+<section class="tr">
+    <div class="tr-item"><i class="fas fa-chair"></i><div><strong>Live seat map</strong><span>Pick your exact seat</span></div></div>
+    <div class="tr-item"><i class="fas fa-bolt"></i><div><strong>Instant booking</strong><span>Confirmed in one step</span></div></div>
+    <div class="tr-item"><i class="fas fa-lock"></i><div><strong>Secure sessions</strong><span>Your data stays protected</span></div></div>
+    <div class="tr-item"><i class="fas fa-medal"></i><div><strong>Loyalty miles</strong><span>Earn on every flight</span></div></div>
+</section>
+
+<section class="cards">
+    <a class="dest" asp-page="/Search" asp-route-destination="DXB" style="--photo-remote:url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1000&q=70')">
+        <span class="dest-tag">Popular destination</span>
+        <h3>Dubai</h3><p>United Arab Emirates</p>
+        <span class="pill">Search flights</span>
+    </a>
+    <a class="dest" asp-page="/Search" asp-route-destination="NRT" style="--photo-remote:url('https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1000&q=70')">
+        <span class="dest-tag">Trending</span>
+        <h3>Tokyo</h3><p>Japan</p>
+        <span class="pill">Search flights</span>
+    </a>
+    <div class="offer">
+        <i class="fas fa-plane ghost-plane" aria-hidden="true"></i>
+        <h3>Earn miles on every trip</h3>
+        <p>Every 40 miles you collect gives you 10% off your next booking. Business seats earn double.</p>
+        <a class="pill" asp-page="/Login">Sign in</a>
+    </div>
+</section>
+
+@if (Model.Airports.Count > 0)
+{
+    <section class="strip">
+        <span class="strip-title">Airports in the network</span>
+        @foreach (var a in Model.Airports.Take(10)) { <span>@a.Code</span> }
+    </section>
+}
+
+<section class="user-roles" id="roles">
+    <h2>Built for three kinds of users</h2>
+    <div class="roles-grid">
+        <div class="role-card passenger">
+            <span class="role-icon"><i class="fas fa-user"></i></span>
+            <h3>Passenger</h3>
+            <ul>
+                <li>Search and book flights</li>
+                <li>Manage bookings and cancellations</li>
+                <li>Track loyalty miles</li>
+                <li>Follow baggage status</li>
+            </ul>
+        </div>
+        <div class="role-card staff">
+            <span class="role-icon"><i class="fas fa-id-badge"></i></span>
+            <h3>Staff</h3>
+            <ul>
+                <li>Check in passengers</li>
+                <li>Register baggage</li>
+                <li>Set flight status</li>
+                <li>Manage passenger lists</li>
+            </ul>
+        </div>
+        <div class="role-card admin">
+            <span class="role-icon"><i class="fas fa-user-shield"></i></span>
+            <h3>Admin</h3>
+            <ul>
+                <li>Manage users, airports and routes</li>
+                <li>Add flights and aircraft</li>
+                <li>Generate reports</li>
+            </ul>
+        </div>
+    </div>
+</section>

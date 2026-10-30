@@ -1,11 +1,25 @@
 @page
 @model Aerion.Pages.Admin.FaresModel
 @{ ViewData["Title"] = "Fare classes"; }
-<h2>Miles per fare class</h2>
-<p class="text-muted">Miles earned = distance / 100 x this multiplier.</p>
-<table class="table align-middle"><thead><tr><th>Class</th><th>Price x</th><th>Miles x</th><th></th></tr></thead><tbody>
-@foreach (var c in Model.Classes)
-{
- <tr><td>@c.Name</td><td>@c.Price</td><td colspan="2"><form method="post" class="d-flex gap-2"><input type="hidden" name="id" value="@c.Id" /><input name="miles" value="@c.Miles" class="form-control w-auto" /><button class="btn btn-primary btn-sm">Save</button></form></td></tr>
-}
-</tbody></table>
+<div class="section-panel">
+    <h2><i class="fas fa-medal"></i> Miles per fare class</h2>
+    <p class="muted">Miles earned = distance / 100 x this multiplier.</p>
+    <table>
+        <thead><tr><th>Class</th><th>Price x</th><th>Miles x</th></tr></thead>
+        <tbody>
+        @foreach (var c in Model.Classes)
+        {
+            <tr>
+                <td>@c.Name</td><td>@c.Price</td>
+                <td>
+                    <form method="post" class="inline-form">
+                        <input type="hidden" name="id" value="@c.Id" />
+                        <input name="miles" value="@c.Miles" size="4" aria-label="Miles multiplier" />
+                        <button type="submit" class="btn-small">Save</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

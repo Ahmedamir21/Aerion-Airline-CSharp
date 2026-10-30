@@ -1,12 +1,40 @@
 @page
 @model Aerion.Pages.Admin.CrewModel
 @{ ViewData["Title"] = "Crew"; }
-<h2>Crew assignment</h2>
-<form method="get" class="d-flex gap-2 mb-3"><select name="flightId" class="form-select w-auto">@foreach (var f in Model.Flights) { <option value="@f.Id" selected="@(Model.FlightId == f.Id)">@f.Text</option> }</select><button class="btn btn-primary">Open</button></form>
-@if (Model.FlightId != null)
-{
- <h5>On this flight</h5>
- <ul>@foreach (var c in Model.Assigned) { <li>@c.Name (@c.Role) <form method="post" asp-page-handler="Remove" class="d-inline"><input type="hidden" name="flightId" value="@Model.FlightId" /><input type="hidden" name="crewId" value="@c.Id" /><button class="btn btn-link btn-sm text-danger">remove</button></form></li> }</ul>
- <h5>Available</h5>
- <ul>@foreach (var c in Model.Available) { <li>@c.Name (@c.Role) <form method="post" asp-page-handler="Add" class="d-inline"><input type="hidden" name="flightId" value="@Model.FlightId" /><input type="hidden" name="crewId" value="@c.Id" /><button class="btn btn-link btn-sm">assign</button></form></li> }</ul>
-}
+<div class="section-panel">
+    <h2><i class="fas fa-people-group"></i> Crew assignment</h2>
+    <form method="get" class="toolbar">
+        <div class="form-group">
+            <label for="flightId">Flight</label>
+            <select id="flightId" name="flightId">@foreach (var f in Model.Flights) { <option value="@f.Id" selected="@(Model.FlightId == f.Id)">@f.Text</option> }</select>
+        </div>
+        <button type="submit" class="btn-primary">Open</button>
+    </form>
+    @if (Model.FlightId != null)
+    {
+        <h3>On this flight</h3>
+        <ul>
+            @foreach (var c in Model.Assigned)
+            {
+                <li>@c.Name (@c.Role)
+                    <form method="post" asp-page-handler="Remove" class="inline-form">
+                        <input type="hidden" name="flightId" value="@Model.FlightId" /><input type="hidden" name="crewId" value="@c.Id" />
+                        <button type="submit" class="btn-small btn-danger">Remove</button>
+                    </form>
+                </li>
+            }
+        </ul>
+        <h3>Available</h3>
+        <ul>
+            @foreach (var c in Model.Available)
+            {
+                <li>@c.Name (@c.Role)
+                    <form method="post" asp-page-handler="Add" class="inline-form">
+                        <input type="hidden" name="flightId" value="@Model.FlightId" /><input type="hidden" name="crewId" value="@c.Id" />
+                        <button type="submit" class="btn-small">Assign</button>
+                    </form>
+                </li>
+            }
+        </ul>
+    }
+</div>

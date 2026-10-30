@@ -1,43 +1,83 @@
 @page
 @model SearchModel
 @{ ViewData["Title"] = "Search flights"; }
-<h2>Search flights</h2>
-<form method="get" class="row g-2 mb-4">
-    <div class="col-md-3"><select name="origin" class="form-select">
-        <option value="">From: anywhere</option>
-        @foreach (var a in Model.Airports) { <option value="@a.Code" selected="@(Model.Origin == a.Code)">@a.City (@a.Code)</option> }
-    </select></div>
-    <div class="col-md-3"><select name="destination" class="form-select">
-        <option value="">To: anywhere</option>
-        @foreach (var a in Model.Airports) { <option value="@a.Code" selected="@(Model.Destination == a.Code)">@a.City (@a.Code)</option> }
-    </select></div>
-    <div class="col-md-3"><input type="date" name="date" class="form-control" value="@(Model.Date?.ToString("yyyy-MM-dd"))" /></div>
-    <div class="col-md-3"><button class="btn btn-primary w-100">Find flights</button></div>
-</form>
+<div class="search-container">
+    <div class="search-box">
+        <h2><i class="fas fa-search"></i> Search Flights</h2>
+        <p class="muted">Pick where you want to go. Departure airport and date are optional; we show the nearest flights first.</p>
+        <form method="get" class="search-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>From <small>(optional)</small></label>
+                    <select name="origin">
+                        <option value="">Anywhere</option>
+                        @foreach (var a in Model.Airports) { <option value="@a.Code" selected="@(Model.Origin == a.Code)">@a.City (@a.Code)</option> }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>To</label>
+                    <select name="destination">
+                        <option value="">Anywhere</option>
+                        @foreach (var a in Model.Airports) { <option value="@a.Code" selected="@(Model.Destination == a.Code)">@a.City (@a.Code)</option> }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Departure date <small>(optional)</small></label>
+                <input type="date" name="date" value="@(Model.Date?.ToString("yyyy-MM-dd"))">
+            </div>
+            <button type="submit" class="btn-search"><i class="fas fa-search"></i> Find flights</button>
+        </form>
+    </div>
+</div>
+
 @if (Model.Searched)
 {
-    @if (Model.Fallback) { <p class="text-muted">No flights on that date, showing the nearest ones.</p> }
-    @if (Model.Flights.Count == 0) { <p>No upcoming flights match your search.</p> }
-    else
-    {
-        <table class="table align-middle">
-            <thead><tr><th>Flight</th><th>Route</th><th>Departs</th><th>Arrives</th><th>Aircraft</th><th>Economy</th><th>Business</th><th>Free seats</th><th></th></tr></thead>
-            <tbody>
-            @foreach (var f in Model.Flights)
+    <div class="search-results">
+        <div class="results-header">
+            <h2><i class="fas fa-plane-departure"></i> Search Results</h2>
+            @if (Model.Fallback)
             {
-                <tr>
-                    <td>@f.Number <span class="badge bg-secondary">@f.Status</span></td>
-                    <td>@f.From &rarr; @f.To</td>
-                    <td>@f.Dep.ToString("ddd dd MMM, HH:mm")</td>
-                    <td>@f.Arr.ToString("HH:mm")</td>
-                    <td>@f.Model</td>
-                    <td>$@f.Economy.ToString("N0")</td>
-                    <td>$@f.Business.ToString("N0")</td>
-                    <td>@f.Free</td>
-                    <td><a class="btn btn-primary btn-sm" asp-page="/Book" asp-route-id="@f.Id">Book</a></td>
-                </tr>
+                <p class="muted">No flights on that day, so these are the nearest ones we have.</p>
             }
-            </tbody>
-        </table>
-    }
+        </div>
+
+        @if (Model.Flights.Count == 0)
+        {
+            <div class="no-results-found">
+                <i class="fas fa-search"></i>
+                <p>No upcoming flights match your search.</p>
+                <p>Try another airport or remove the date.</p>
+            </div>
+        }
+        else
+        {
+            <div class="results-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Flight #</th><th>Route</th><th>Departs</th><th>Arrives</th><th>Aircraft</th>
+                            <th>Economy</th><th>Business</th><th>Seats</th><th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var f in Model.Flights)
+                    {
+                        <tr class="result-row">
+                            <td><strong>@f.Number</strong><br><span class="status-badge @AppPage.StatusClass(f.Status)">@f.Status</span></td>
+                            <td>@f.From &rarr; @f.To</td>
+                            <td>@f.Dep.ToString("ddd dd MMM, HH:mm")</td>
+                            <td>@f.Arr.ToString("HH:mm")</td>
+                            <td>@f.Model</td>
+                            <td>$@f.Economy.ToString("N0")</td>
+                            <td>$@f.Business.ToString("N0")</td>
+                            <td>@f.Free free</td>
+                            <td><a asp-page="/Book" asp-route-id="@f.Id" class="btn-primary">Book</a></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
 }
