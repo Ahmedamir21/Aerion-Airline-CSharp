@@ -22,7 +22,7 @@ The editable version is `docs/er-diagram.drawio` (open in draw.io).
 3. Check the connection string in `Aerion/appsettings.json`.
 4. From the `Aerion` folder run `dotnet run`. On the first run the app fills the empty database with demo airports, routes, aircraft, crew, flights and seats.
 
-Demo accounts (created on the first run): `admin1 / Admin@123`, `staff1 / Staff@123`, `passenger1 / Pass@123` (passenger1 has 120 miles). Change them after the first login.
+Demo accounts (created on the first run): `admin1` gets the password from `Seed:AdminPassword` in appsettings or, if it is empty, a random one printed in the console on the first run. In Development only, demo accounts `staff1 / Staff@123` and `passenger1 / Pass@123` (120 miles) are also created.
 
 ## Notes
 - All database access goes through the `Db` class (parameterised ADO.NET commands).

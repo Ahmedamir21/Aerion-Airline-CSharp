@@ -19,6 +19,7 @@ public class LoginModel : AppPage
         {
             var recent = Failures.GetValueOrDefault(key, new()).Where(t => t > DateTime.Now.AddMinutes(-5)).ToList();
             Failures[key] = recent;
+            if (Failures.Count > 5000) Failures.Clear();
             if (recent.Count >= 5)
             {
                 Err("Too many failed attempts. Try again in a few minutes.");

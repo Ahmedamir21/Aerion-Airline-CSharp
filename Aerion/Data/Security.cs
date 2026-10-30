@@ -5,7 +5,7 @@ namespace Aerion.Data;
 // Passwords are stored as PBKDF2 hashes: v1$iterations$salt$hash (never plain text).
 public static class Security
 {
-    private const int Iterations = 100000;
+    private const int Iterations = 600000;
 
     public static string Hash(string password)
     {

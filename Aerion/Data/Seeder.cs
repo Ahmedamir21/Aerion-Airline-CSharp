@@ -3,7 +3,7 @@ namespace Aerion.Data;
 // Fills an empty database with demo data the first time the app runs.
 public static class Seeder
 {
-    public static void Run(Db db)
+    public static void Run(Db db, IConfiguration config, bool isDevelopment)
     {
         if (db.Int("SELECT COUNT(*) FROM Airport") > 0) return;
 
@@ -47,13 +47,32 @@ public static class Seeder
         foreach (var c in crew)
             db.Execute("INSERT INTO CrewMember (Name, CrewRole, LicenseNo) VALUES (@n,@r,@l)", ("@n", c.Item1), ("@r", c.Item2), ("@l", "EG-" + Math.Abs(c.Item1.GetHashCode() % 90000 + 10000)));
 
-        AddUser(db, "admin1", "Admin@123", "admin", "Aerion Admin", "Operations");
+        // The first admin gets the password from configuration (Seed:AdminPassword).
+        // Without it a random one is generated and printed once, so no default password exists.
+        string adminPassword = config["Seed:AdminPassword"] ?? "";
+        if (adminPassword.Length < 10)
+        {
+            adminPassword = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(12)).Replace('+', 'A').Replace('/', 'B');
+            Console.WriteLine("FIRST ADMIN: username admin1, password " + adminPassword + " (change it after logging in)");
+        }
+        AddUser(db, "admin1", adminPassword, "admin", "Aerion Admin", "Operations");
+
+        // Demo staff and passengers are only created for local development.
+        if (isDevelopment) SeedDemoAccounts(db);
+        SeedFlights(db);
+    }
+
+    private static void SeedDemoAccounts(Db db)
+    {
         AddUser(db, "staff1", "Staff@123", "staff", "Mariam Salah", "Check-in agent");
         AddUser(db, "staff2", "Staff@123", "staff", "Omar Khaled", "Check-in agent");
         var names = new[] { "Omar Hassan", "Nour El-Din", "Mariam Adel", "Youssef Khaled", "Salma Mostafa", "Karim Fathy", "Hana Samir", "Mahmoud Ali", "Laila Ibrahim", "Tamer Nabil" };
         for (int i = 0; i < names.Length; i++)
             AddPassenger(db, "passenger" + (i + 1), "Pass@123", names[i], "A" + (2000100 + i * 37), i == 0 ? 120 : 0);
+    }
 
+    private static void SeedFlights(Db db)
+    {
         // Flights: every route, 4 departures spread over the next weeks.
         var routeRows = db.Query("SELECT RouteID, DistanceKm FROM Route ORDER BY RouteID", r => (Id: r.Int("RouteID"), Km: r.Int("DistanceKm")));
         var planes = db.Query("SELECT AircraftID, TotalSeats FROM Aircraft ORDER BY AircraftID", r => (Id: r.Int("AircraftID"), Seats: r.Int("TotalSeats")));

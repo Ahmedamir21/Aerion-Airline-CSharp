@@ -53,7 +53,7 @@ public class BookingService
                     return new BookResult(false, "This flight is no longer open for booking.");
 
                 // Discount from loyalty miles (only valid for the passenger's own balance).
-                int balance = Convert.ToInt32(tx.Scalar("SELECT MilesBalance FROM LoyaltyAccount WHERE PassengerID = @p", ("@p", passengerId)) ?? 0);
+                int balance = Convert.ToInt32(tx.Scalar("SELECT MilesBalance FROM LoyaltyAccount WITH (UPDLOCK, HOLDLOCK) WHERE PassengerID = @p", ("@p", passengerId)) ?? 0);
                 int units = Math.Max(0, Math.Min(milesUnits, Math.Min(MaxDiscountUnits, balance / MilesPerDiscount)));
                 decimal discount = units * DiscountPerUnit / 100m;
 
@@ -140,13 +140,16 @@ public class BookingService
                 if (b.Status == "cancelled") return new BookResult(false, "This booking is already cancelled.");
                 if (b.Dep <= DateTime.Now) return new BookResult(false, "A flight that already left cannot be cancelled.");
 
+                // Only one request can flip the status, so miles are never refunded twice.
+                int flipped = tx.Execute("UPDATE Booking SET Status = 'cancelled', CancelledAt = SYSDATETIME() WHERE BookingID = @b AND Status = 'confirmed'", ("@b", bookingId));
+                if (flipped != 1) return new BookResult(false, "This booking is already cancelled.");
+
                 // Free the seats first (needs the ticket rows), then clear them from the tickets.
                 tx.Execute(
                     "UPDATE s SET s.IsAvailable = 1 FROM Seat s JOIN Ticket t ON t.FlightID = s.FlightID AND t.SeatNumber = s.SeatNumber " +
                     "WHERE t.BookingID = @b", ("@b", bookingId));
                 tx.Execute("UPDATE Ticket SET Status = 'cancelled', SeatNumber = NULL WHERE BookingID = @b", ("@b", bookingId));
                 tx.Execute("UPDATE Payment SET Status = 'refunded' WHERE BookingID = @b", ("@b", bookingId));
-                tx.Execute("UPDATE Booking SET Status = 'cancelled', CancelledAt = SYSDATETIME() WHERE BookingID = @b", ("@b", bookingId));
 
                 // Give back spent miles and take back the earned ones.
                 int loyaltyId = Convert.ToInt32(tx.Scalar("SELECT LoyaltyID FROM LoyaltyAccount WHERE PassengerID = @p", ("@p", b.Pid)));

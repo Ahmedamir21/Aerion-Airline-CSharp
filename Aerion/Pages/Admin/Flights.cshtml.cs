@@ -37,6 +37,7 @@ public class FlightsModel : AppPage
         {
             if (Departure <= DateTime.Now) { Err("Departure must be in the future."); return RedirectToPage(); }
             int seats = Db.Int("SELECT TotalSeats FROM Aircraft WHERE AircraftID = @a", ("@a", AircraftId));
+            if (seats == 0 || Db.Int("SELECT COUNT(*) FROM Route WHERE RouteID = @r", ("@r", RouteId)) == 0) { Err("Choose a valid route and aircraft."); return RedirectToPage(); }
             // Seats are created from the aircraft size, so the cabin map always matches the plane.
             Seeder.AddFlight(Db, RouteId, AircraftId, seats, FlightNumber.Trim().ToUpper(), Departure, Arrival);
             Ok("Flight added with its seats.");
