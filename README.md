@@ -29,3 +29,6 @@ Demo accounts (created on the first run): `admin1` gets the password from `Seed:
 - Passwords are stored as PBKDF2 hashes, never as text.
 - A booking runs in one SQL transaction. The seat is taken with `UPDATE ... WHERE IsAvailable = 1`, so two people cannot get the same seat.
 - Pages check the role in `AppPage`; a passenger cannot open staff or admin pages.
+
+## Supabase copy
+The course stack is SQL Server, which Supabase does not run. A separate Supabase project (`Aerion-CSharp-DB`, its own database, not shared with any other repo) holds a PostgreSQL copy of the same tables and demo data so the data can be browsed online. The app itself still connects to SQL Server. Row level security is on for every table and no public policies exist.
