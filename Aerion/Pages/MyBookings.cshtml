@@ -1,0 +1,31 @@
+@page
+@model MyBookingsModel
+@{ ViewData["Title"] = "My bookings"; }
+<h2>Upcoming</h2>
+@if (Model.Upcoming.Count == 0) { <p class="text-muted">No upcoming bookings. <a asp-page="/Search">Find a flight</a>.</p> }
+else
+{
+ <table class="table align-middle"><thead><tr><th>Booking</th><th>Flight</th><th>Route</th><th>Departs</th><th>Seat</th><th>Paid</th><th></th></tr></thead><tbody>
+ @foreach (var b in Model.Upcoming)
+ {
+  <tr><td>#@b.Id</td><td>@b.Flight</td><td>@b.Route</td><td>@b.Dep.ToString("ddd dd MMM, HH:mm")</td><td>@b.Seat</td><td>$@b.Paid.ToString("N2")</td>
+   <td class="text-end">
+    <a class="btn btn-outline-primary btn-sm" asp-page="/MyBookings" asp-route-changeTicket="@b.TicketId">Change seat</a>
+    <form method="post" asp-page-handler="Cancel" asp-route-id="@b.Id" class="d-inline" onsubmit="return confirm('Cancel this booking?')"><button class="btn btn-outline-danger btn-sm">Cancel</button></form>
+   </td></tr>
+  @if (Model.ChangeTicket == b.TicketId)
+  {
+   <tr><td colspan="7">
+    <form method="post" asp-page-handler="Change" class="d-flex gap-2">
+     <input type="hidden" name="ticketId" value="@b.TicketId" />
+     <select name="seat" class="form-select w-auto">@foreach (var s in Model.FreeSeats) { <option>@s</option> }</select>
+     <button class="btn btn-primary btn-sm">Move me here</button>
+    </form></td></tr>
+  }
+ }
+ </tbody></table>
+}
+<h2 class="mt-4">History</h2>
+<table class="table"><thead><tr><th>Booking</th><th>Flight</th><th>Route</th><th>Date</th><th>Seat</th><th>Status</th></tr></thead><tbody>
+@foreach (var b in Model.Past) { <tr><td>#@b.Id</td><td>@b.Flight</td><td>@b.Route</td><td>@b.Dep.ToString("dd MMM yyyy")</td><td>@b.Seat</td><td>@b.Status</td></tr> }
+</tbody></table>

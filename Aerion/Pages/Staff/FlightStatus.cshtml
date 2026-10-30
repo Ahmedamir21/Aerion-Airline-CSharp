@@ -1,0 +1,21 @@
+@page
+@model Aerion.Pages.Staff.FlightStatusModel
+@{ ViewData["Title"] = "Flight status"; }
+<h2>Flight status</h2>
+<table class="table align-middle"><thead><tr><th>Flight</th><th>Route</th><th>Departs</th><th>Status</th><th></th></tr></thead><tbody>
+@foreach (var f in Model.Flights)
+{
+ <tr><td>@f.Number</td><td>@f.Route</td><td>@f.Dep.ToString("dd MMM HH:mm")</td>
+ <td><form method="post" asp-page-handler="Status" class="d-inline-flex gap-1"><input type="hidden" name="id" value="@f.Id" />
+  <select name="status" class="form-select form-select-sm">@foreach (var s in new[] { "on time", "delayed", "cancelled" }) { <option selected="@(f.Status == s)">@s</option> }</select>
+  <button class="btn btn-outline-primary btn-sm">Save</button></form></td>
+ <td><a asp-page="/Staff/FlightStatus" asp-route-list="@f.Id">Passenger list</a></td></tr>
+}
+</tbody></table>
+@if (Model.List != null)
+{
+ <h4>Passenger list</h4>
+ <table class="table"><thead><tr><th>Name</th><th>Passport</th><th>Seat</th><th>Ticket</th></tr></thead><tbody>
+ @foreach (var p in Model.Passengers) { <tr><td>@p.Name</td><td>@p.Passport</td><td>@p.Seat</td><td>@p.Status</td></tr> }
+ </tbody></table>
+}

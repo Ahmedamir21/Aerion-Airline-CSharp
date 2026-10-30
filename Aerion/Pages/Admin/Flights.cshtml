@@ -1,0 +1,16 @@
+@page
+@model Aerion.Pages.Admin.FlightsModel
+@{ ViewData["Title"] = "Flights"; }
+<h2>@(Model.EditId == null ? "Add a flight" : "Edit flight")</h2>
+<form method="post" class="row g-2 mb-4">
+ <input type="hidden" asp-for="EditId" />
+ <div class="col-md-4"><label class="form-label">Route</label><select asp-for="RouteId" class="form-select">@foreach (var r in Model.Routes) { <option value="@r.Id">@r.Text</option> }</select></div>
+ <div class="col-md-3"><label class="form-label">Aircraft</label><select asp-for="AircraftId" class="form-select" disabled="@(Model.EditId != null)">@foreach (var a in Model.Aircraft) { <option value="@a.Id">@a.Text (@a.Seats seats)</option> }</select></div>
+ <div class="col-md-2"><label class="form-label">Flight number</label><input asp-for="FlightNumber" class="form-control" /></div>
+ <div class="col-md-3"><label class="form-label">Departure</label><input asp-for="Departure" type="datetime-local" class="form-control" /></div>
+ <div class="col-md-3"><label class="form-label">Arrival</label><input asp-for="Arrival" type="datetime-local" class="form-control" /></div>
+ <div class="col-12"><button class="btn btn-primary">Save</button></div>
+</form>
+<table class="table"><thead><tr><th>Flight</th><th>Route</th><th>Departs</th><th>Arrives</th><th>Aircraft</th><th>Status</th><th></th></tr></thead><tbody>
+@foreach (var f in Model.Flights) { <tr><td>@f.Number</td><td>@f.Route</td><td>@f.Dep.ToString("dd MMM HH:mm")</td><td>@f.Arr.ToString("dd MMM HH:mm")</td><td>@f.Plane</td><td>@f.Status</td><td><a asp-page="/Admin/Flights" asp-route-edit="@f.Id">Edit</a></td></tr> }
+</tbody></table>

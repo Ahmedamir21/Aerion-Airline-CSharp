@@ -1,0 +1,24 @@
+@page
+@model Aerion.Pages.Admin.NetworkModel
+@{ ViewData["Title"] = "Network"; }
+<h2>Airports</h2>
+<form method="post" asp-page-handler="Airport" class="row g-2 mb-3">
+ <div class="col-md-2"><input name="code" class="form-control" placeholder="Code" /></div><div class="col-md-4"><input name="name" class="form-control" placeholder="Airport name" /></div>
+ <div class="col-md-2"><input name="city" class="form-control" placeholder="City" /></div><div class="col-md-2"><input name="country" class="form-control" placeholder="Country" /></div>
+ <div class="col-md-2"><button class="btn btn-primary w-100">Add airport</button></div>
+</form>
+<p>@string.Join(", ", Model.Airports.Select(a => a.Text))</p>
+<h2>Routes</h2>
+<form method="post" asp-page-handler="Route" class="row g-2 mb-3">
+ <div class="col-md-3"><select name="from" class="form-select">@foreach (var a in Model.Airports) { <option value="@a.Id">@a.Text</option> }</select></div>
+ <div class="col-md-3"><select name="to" class="form-select">@foreach (var a in Model.Airports) { <option value="@a.Id">@a.Text</option> }</select></div>
+ <div class="col-md-2"><input name="km" type="number" class="form-control" placeholder="Distance km" /></div><div class="col-md-2"><input name="fare" type="number" step="0.01" class="form-control" placeholder="Base fare $" /></div>
+ <div class="col-md-2"><button class="btn btn-primary w-100">Add route</button></div>
+</form>
+<table class="table"><thead><tr><th>Route</th><th>Km</th><th>Economy fare</th></tr></thead><tbody>@foreach (var r in Model.Routes) { <tr><td>@r.Route</td><td>@r.Km</td><td>$@r.Fare.ToString("N0")</td></tr> }</tbody></table>
+<h2>Aircraft</h2>
+<form method="post" asp-page-handler="Aircraft" class="row g-2 mb-3">
+ <div class="col-md-3"><input name="reg" class="form-control" placeholder="Registration" /></div><div class="col-md-4"><input name="model" class="form-control" placeholder="Model" /></div>
+ <div class="col-md-3"><input name="seats" type="number" class="form-control" placeholder="Seats" /></div><div class="col-md-2"><button class="btn btn-primary w-100">Add aircraft</button></div>
+</form>
+<table class="table"><tbody>@foreach (var a in Model.Aircraft) { <tr><td>@a.Reg</td><td>@a.Model</td><td>@a.Seats seats</td></tr> }</tbody></table>

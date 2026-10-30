@@ -1,0 +1,8 @@
+@page
+@model AccountModel
+@{ ViewData["Title"] = "Miles"; }
+<h2>Loyalty miles</h2>
+<p class="lead">You have <strong>@Model.Balance</strong> miles. Every @BookingService.MilesPerDiscount miles gives @BookingService.DiscountPerUnit% off a booking (up to @(BookingService.MaxDiscountUnits * BookingService.DiscountPerUnit)%).</p>
+<table class="table"><thead><tr><th>Date</th><th>Miles</th><th>Reason</th></tr></thead><tbody>
+@foreach (var h in Model.History) { <tr><td>@h.When.ToString("dd MMM yyyy HH:mm")</td><td>@(h.Miles > 0 ? "+" : "")@h.Miles</td><td>@h.Reason</td></tr> }
+</tbody></table>

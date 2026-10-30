@@ -1,0 +1,11 @@
+@page
+@model Aerion.Pages.Admin.FaresModel
+@{ ViewData["Title"] = "Fare classes"; }
+<h2>Miles per fare class</h2>
+<p class="text-muted">Miles earned = distance / 100 x this multiplier.</p>
+<table class="table align-middle"><thead><tr><th>Class</th><th>Price x</th><th>Miles x</th><th></th></tr></thead><tbody>
+@foreach (var c in Model.Classes)
+{
+ <tr><td>@c.Name</td><td>@c.Price</td><td colspan="2"><form method="post" class="d-flex gap-2"><input type="hidden" name="id" value="@c.Id" /><input name="miles" value="@c.Miles" class="form-control w-auto" /><button class="btn btn-primary btn-sm">Save</button></form></td></tr>
+}
+</tbody></table>

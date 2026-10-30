@@ -1,0 +1,12 @@
+@page
+@model Aerion.Pages.Admin.UsersModel
+@{ ViewData["Title"] = "Accounts"; }
+<h2>Create a staff or admin account</h2>
+<form method="post" class="row g-2 mb-4">
+ <div class="col-md-3"><input name="name" class="form-control" placeholder="Full name" required /></div>
+ <div class="col-md-3"><input name="username" class="form-control" placeholder="Username" required /></div>
+ <div class="col-md-2"><select name="role" class="form-select"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
+ <div class="col-md-2"><input name="password" type="password" class="form-control" placeholder="Password (8+)" required /></div>
+ <div class="col-md-2"><button class="btn btn-primary w-100">Create</button></div>
+</form>
+<table class="table"><thead><tr><th>Username</th><th>Role</th><th>Name</th></tr></thead><tbody>@foreach (var a in Model.Accounts) { <tr><td>@a.Username</td><td>@a.Role</td><td>@a.Name</td></tr> }</tbody></table>

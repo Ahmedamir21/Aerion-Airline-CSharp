@@ -1,0 +1,8 @@
+@page
+@model Aerion.Pages.Admin.HistoryModel
+@{ ViewData["Title"] = "History"; }
+<h2>Bookings and cancellations</h2>
+<form method="get" class="d-flex gap-2 mb-3"><select name="status" class="form-select w-auto"><option value="">All</option><option value="confirmed" selected="@(Model.Status == "confirmed")">Confirmed</option><option value="cancelled" selected="@(Model.Status == "cancelled")">Cancelled</option></select><button class="btn btn-primary">Filter</button></form>
+<table class="table"><thead><tr><th>#</th><th>Passenger</th><th>Flight</th><th>Booked</th><th>Amount</th><th>Status</th><th>Made by</th></tr></thead><tbody>
+@foreach (var r in Model.Rows) { <tr><td>@r.Id</td><td>@r.Passenger</td><td>@r.Flight</td><td>@r.Booked.ToString("dd MMM yyyy HH:mm")</td><td>$@r.Amount.ToString("N2")</td><td>@r.Status</td><td>@r.By</td></tr> }
+</tbody></table>

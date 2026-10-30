@@ -1,0 +1,13 @@
+@page
+@model Aerion.Pages.Admin.IndexModel
+@{ ViewData["Title"] = "Admin"; }
+<h2>Administration</h2>
+<div class="list-group">
+ <a class="list-group-item" asp-page="/Admin/Flights">Flights: add, edit, schedule</a>
+ <a class="list-group-item" asp-page="/Admin/Network">Routes, airports and aircraft</a>
+ <a class="list-group-item" asp-page="/Admin/Crew">Crew assignment</a>
+ <a class="list-group-item" asp-page="/Admin/Users">Accounts for staff and admins</a>
+ <a class="list-group-item" asp-page="/Admin/Fares">Miles per fare class</a>
+ <a class="list-group-item" asp-page="/Admin/History">Booking and cancellation history</a>
+ <a class="list-group-item" asp-page="/Admin/Reports">Reports</a>
+</div>

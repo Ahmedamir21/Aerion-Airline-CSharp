@@ -1,0 +1,18 @@
+@page
+@model IndexModel
+@{ ViewData["Title"] = "Home"; }
+<div class="p-5 mb-4 rounded text-white" style="background:#1d2b64">
+    <h1>Aerion</h1>
+    <p class="lead">Search flights, pick your exact seat, and earn miles on every trip.</p>
+    <form method="get" asp-page="/Search" class="row g-2">
+        <div class="col-md-4"><input name="origin" class="form-control" placeholder="From (optional, e.g. CAI)" /></div>
+        <div class="col-md-4"><input name="destination" class="form-control" placeholder="To (e.g. DXB)" /></div>
+        <div class="col-md-2"><input name="date" type="date" class="form-control" /></div>
+        <div class="col-md-2"><button class="btn btn-light w-100">Search</button></div>
+    </form>
+</div>
+<div class="row g-3">
+    <div class="col-md-6"><a class="text-decoration-none" asp-page="/Search" asp-route-destination="DXB"><div class="card p-4"><h4>Dubai</h4><span class="text-muted">See flights to Dubai</span></div></a></div>
+    <div class="col-md-6"><a class="text-decoration-none" asp-page="/Search" asp-route-destination="NRT"><div class="card p-4"><h4>Tokyo</h4><span class="text-muted">See flights to Tokyo</span></div></a></div>
+</div>
+<p class="mt-4 text-muted">Every 40 loyalty miles gives you 10% off your next booking. Business seats earn double miles.</p>
