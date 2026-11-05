@@ -12,14 +12,14 @@ public class CrewModel : AppPage
 
     public void OnGet()
     {
-        Flights = Db.Query("SELECT TOP 80 f.FlightID, f.FlightNumber + ' ' + FORMAT(f.DepartureTime, 'dd MMM HH:mm') AS T FROM Flight f WHERE f.DepartureTime > SYSDATETIME() ORDER BY f.DepartureTime", r => (r.Int("FlightID"), r.Str("T")));
+        Flights = Db.Query("SELECT TOP 80 f.FlightID, f.FlightNumber + ' ' + FORMAT(f.DepartureDateTime, 'dd MMM HH:mm') AS T FROM Flight f WHERE f.DepartureDateTime > SYSDATETIME() ORDER BY f.DepartureDateTime", r => (r.Int("FlightID"), r.Str("T")));
         if (FlightId == null) return;
         Assigned = Db.Query("SELECT c.CrewID, c.Name, c.CrewRole FROM FlightCrew fc JOIN CrewMember c ON c.CrewID = fc.CrewID WHERE fc.FlightID = @f", r => (r.Int("CrewID"), r.Str("Name"), r.Str("CrewRole")), ("@f", FlightId));
         // A crew member already on another flight at the same time is not offered.
         Available = Db.Query(
             "SELECT c.CrewID, c.Name, c.CrewRole FROM CrewMember c WHERE c.CrewID NOT IN (SELECT CrewID FROM FlightCrew WHERE FlightID = @f) " +
             "AND NOT EXISTS (SELECT 1 FROM FlightCrew x JOIN Flight f2 ON f2.FlightID = x.FlightID, Flight f1 " +
-            "WHERE x.CrewID = c.CrewID AND f1.FlightID = @f AND f2.DepartureTime < f1.ArrivalTime AND f2.ArrivalTime > f1.DepartureTime) ORDER BY c.CrewRole, c.Name",
+            "WHERE x.CrewID = c.CrewID AND f1.FlightID = @f AND f2.DepartureDateTime < f1.ArrivalDateTime AND f2.ArrivalDateTime > f1.DepartureDateTime) ORDER BY c.CrewRole, c.Name",
             r => (r.Int("CrewID"), r.Str("Name"), r.Str("CrewRole")), ("@f", FlightId));
     }
 

@@ -33,12 +33,12 @@ public class MyBookingsModel : AppPage
     public void OnGet()
     {
         var all = Db.Query(
-            "SELECT b.BookingID, t.TicketID, t.FlightID, f.FlightNumber, a.Code AS FromCode, c.Code AS ToCode, f.DepartureTime, " +
+            "SELECT b.BookingID, t.TicketID, t.FlightID, f.FlightNumber, a.Code AS FromCode, c.Code AS ToCode, f.DepartureDateTime, " +
             "ISNULL(t.SeatNumber, '-') AS Seat, t.FarePaid, b.Status " +
             "FROM Booking b JOIN Ticket t ON t.BookingID = b.BookingID JOIN Flight f ON f.FlightID = b.FlightID " +
             "JOIN Route r ON r.RouteID = f.RouteID JOIN Airport a ON a.AirportID = r.DepartureAirportID JOIN Airport c ON c.AirportID = r.ArrivalAirportID " +
-            "WHERE b.PassengerID = @p ORDER BY f.DepartureTime DESC",
-            r => new BookingRow { Id = r.Int("BookingID"), TicketId = r.Int("TicketID"), FlightId = r.Int("FlightID"), Flight = r.Str("FlightNumber"), Route = r.Str("FromCode") + " → " + r.Str("ToCode"), Dep = r.Date("DepartureTime"), Seat = r.Str("Seat"), Paid = r.Dec("FarePaid"), Status = r.Str("Status") },
+            "WHERE b.PassengerID = @p ORDER BY f.DepartureDateTime DESC",
+            r => new BookingRow { Id = r.Int("BookingID"), TicketId = r.Int("TicketID"), FlightId = r.Int("FlightID"), Flight = r.Str("FlightNumber"), Route = r.Str("FromCode") + " → " + r.Str("ToCode"), Dep = r.Date("DepartureDateTime"), Seat = r.Str("Seat"), Paid = r.Dec("FarePaid"), Status = r.Str("Status") },
             ("@p", PassengerId));
         Upcoming = all.Where(x => x.Dep > DateTime.Now && x.Status == "confirmed").OrderBy(x => x.Dep).ToList();
         Past = all.Except(Upcoming).ToList();

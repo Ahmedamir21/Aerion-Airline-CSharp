@@ -45,7 +45,7 @@ public class FlightsModel : AppPage
         else
         {
             // The aircraft is not changed after seats exist; times, number and route can be.
-            Db.Execute("UPDATE Flight SET RouteID=@r, FlightNumber=@n, DepartureTime=@d, ArrivalTime=@a WHERE FlightID=@f",
+            Db.Execute("UPDATE Flight SET RouteID=@r, FlightNumber=@n, DepartureDateTime=@d, ArrivalDateTime=@a WHERE FlightID=@f",
                 ("@r", RouteId), ("@n", FlightNumber.Trim().ToUpper()), ("@d", Departure), ("@a", Arrival), ("@f", EditId));
             Ok("Flight updated.");
         }
@@ -57,9 +57,9 @@ public class FlightsModel : AppPage
         Routes = Db.Query("SELECT r.RouteID, a.City + ' (' + a.Code + ') → ' + b.City + ' (' + b.Code + ')' AS T FROM Route r JOIN Airport a ON a.AirportID = r.DepartureAirportID JOIN Airport b ON b.AirportID = r.ArrivalAirportID ORDER BY a.City, b.City", r => (r.Int("RouteID"), r.Str("T")));
         Aircraft = Db.Query("SELECT AircraftID, RegistrationNumber + ' ' + Model AS T, TotalSeats FROM Aircraft", r => (r.Int("AircraftID"), r.Str("T"), r.Int("TotalSeats")));
         Flights = Db.Query(
-            "SELECT TOP 80 f.FlightID, f.FlightNumber, a.Code + ' → ' + b.Code AS Route, f.DepartureTime, f.ArrivalTime, f.Status, ac.Model, f.RouteID, f.AircraftID " +
+            "SELECT TOP 80 f.FlightID, f.FlightNumber, a.Code + ' → ' + b.Code AS Route, f.DepartureDateTime, f.ArrivalDateTime, f.Status, ac.Model, f.RouteID, f.AircraftID " +
             "FROM Flight f JOIN Route r ON r.RouteID = f.RouteID JOIN Airport a ON a.AirportID = r.DepartureAirportID JOIN Airport b ON b.AirportID = r.ArrivalAirportID " +
-            "JOIN Aircraft ac ON ac.AircraftID = f.AircraftID ORDER BY f.DepartureTime DESC",
-            r => (r.Int("FlightID"), r.Str("FlightNumber"), r.Str("Route"), r.Date("DepartureTime"), r.Date("ArrivalTime"), r.Str("Status"), r.Str("Model"), r.Int("RouteID"), r.Int("AircraftID")));
+            "JOIN Aircraft ac ON ac.AircraftID = f.AircraftID ORDER BY f.DepartureDateTime DESC",
+            r => (r.Int("FlightID"), r.Str("FlightNumber"), r.Str("Route"), r.Date("DepartureDateTime"), r.Date("ArrivalDateTime"), r.Str("Status"), r.Str("Model"), r.Int("RouteID"), r.Int("AircraftID")));
     }
 }

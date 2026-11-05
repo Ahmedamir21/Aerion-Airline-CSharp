@@ -53,19 +53,19 @@ public class SearchModel : AppPage
     {
         // Origin and destination are optional filters: an empty value matches everything.
         return Db.Query(
-            "SELECT TOP 40 f.FlightID, f.FlightNumber, f.DepartureTime, f.ArrivalTime, f.Status, ac.Model, r.BaseFare, " +
+            "SELECT TOP 40 f.FlightID, f.FlightNumber, f.DepartureDateTime, f.ArrivalDateTime, f.Status, ac.Model, r.BaseFare, " +
             "a.Code AS FromCode, b.Code AS ToCode, " +
             "(SELECT COUNT(*) FROM Seat s WHERE s.FlightID = f.FlightID AND s.IsAvailable = 1) AS Free, " +
-            "(SELECT PriceMultiplier FROM FareClass WHERE Name = 'Business') AS BizMult " +
+            "(SELECT PriceMultiplier FROM FareClass WHERE ClassName = 'Business') AS BizMult " +
             "FROM Flight f JOIN Route r ON r.RouteID = f.RouteID " +
             "JOIN Airport a ON a.AirportID = r.DepartureAirportID JOIN Airport b ON b.AirportID = r.ArrivalAirportID " +
             "JOIN Aircraft ac ON ac.AircraftID = f.AircraftID " +
-            "WHERE f.DepartureTime >= @start AND f.Status <> 'cancelled' " +
-            "AND (@o = '' OR a.Code = @o) AND (@d = '' OR b.Code = @d) ORDER BY f.DepartureTime",
+            "WHERE f.DepartureDateTime >= @start AND f.Status <> 'cancelled' " +
+            "AND (@o = '' OR a.Code = @o) AND (@d = '' OR b.Code = @d) ORDER BY f.DepartureDateTime",
             r => new FlightRow
             {
                 Id = r.Int("FlightID"), Number = r.Str("FlightNumber"), From = r.Str("FromCode"), To = r.Str("ToCode"),
-                Dep = r.Date("DepartureTime"), Arr = r.Date("ArrivalTime"), Model = r.Str("Model"), Status = r.Str("Status"),
+                Dep = r.Date("DepartureDateTime"), Arr = r.Date("ArrivalDateTime"), Model = r.Str("Model"), Status = r.Str("Status"),
                 Economy = r.Dec("BaseFare"), Business = Math.Round(r.Dec("BaseFare") * r.Dec("BizMult"), 2), Free = r.Int("Free")
             },
             ("@start", start), ("@o", o), ("@d", d));

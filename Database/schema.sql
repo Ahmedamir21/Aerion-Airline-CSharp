@@ -60,9 +60,9 @@ CREATE TABLE Aircraft (
 
 CREATE TABLE FareClass (
     FareClassID     INT IDENTITY PRIMARY KEY,
-    Name            NVARCHAR(20) NOT NULL UNIQUE,
+    ClassName       NVARCHAR(20) NOT NULL UNIQUE,
     PriceMultiplier DECIMAL(4,2) NOT NULL CHECK (PriceMultiplier > 0),
-    MilesMultiplier DECIMAL(4,2) NOT NULL CHECK (MilesMultiplier > 0)
+    MilesRate DECIMAL(4,2) NOT NULL CHECK (MilesRate > 0)
 );
 
 CREATE TABLE Flight (
@@ -70,10 +70,10 @@ CREATE TABLE Flight (
     RouteID       INT NOT NULL REFERENCES Route(RouteID),
     AircraftID    INT NOT NULL REFERENCES Aircraft(AircraftID),
     FlightNumber  NVARCHAR(10) NOT NULL,
-    DepartureTime DATETIME2 NOT NULL,
-    ArrivalTime   DATETIME2 NOT NULL,
+    DepartureDateTime DATETIME2 NOT NULL,
+    ArrivalDateTime   DATETIME2 NOT NULL,
     Status        NVARCHAR(20) NOT NULL DEFAULT 'on time' CHECK (Status IN ('on time','delayed','cancelled')),
-    CONSTRAINT CK_Flight_Times CHECK (ArrivalTime > DepartureTime)
+    CONSTRAINT CK_Flight_Times CHECK (ArrivalDateTime > DepartureDateTime)
 );
 
 CREATE TABLE FlightCrew (

@@ -7,7 +7,7 @@ public static class Seeder
     {
         if (db.Int("SELECT COUNT(*) FROM Airport") > 0) return;
 
-        db.Execute("INSERT INTO FareClass (Name, PriceMultiplier, MilesMultiplier) VALUES ('Economy',1,1),('Business',2.8,2)");
+        db.Execute("INSERT INTO FareClass (ClassName, PriceMultiplier, MilesRate) VALUES ('Economy',1,1),('Business',2.8,2)");
 
         var airports = new[]
         {
@@ -94,10 +94,10 @@ public static class Seeder
         int flightId = db.InTransaction(tx =>
         {
             int id = Convert.ToInt32(tx.Scalar(
-                "INSERT INTO Flight (RouteID, AircraftID, FlightNumber, DepartureTime, ArrivalTime) OUTPUT INSERTED.FlightID VALUES (@r,@a,@n,@d,@t)",
+                "INSERT INTO Flight (RouteID, AircraftID, FlightNumber, DepartureDateTime, ArrivalDateTime) OUTPUT INSERTED.FlightID VALUES (@r,@a,@n,@d,@t)",
                 ("@r", routeId), ("@a", aircraftId), ("@n", flightNumber), ("@d", dep), ("@t", arr)));
             foreach (var (seat, cls) in SeatLayout.SeatList(totalSeats))
-                tx.Execute("INSERT INTO Seat (FlightID, SeatNumber, FareClassID) SELECT @f, @s, FareClassID FROM FareClass WHERE Name=@c",
+                tx.Execute("INSERT INTO Seat (FlightID, SeatNumber, FareClassID) SELECT @f, @s, FareClassID FROM FareClass WHERE ClassName=@c",
                     ("@f", id), ("@s", seat), ("@c", cls));
             return id;
         });

@@ -72,10 +72,10 @@ public class BookModel : AppPage
     private bool Load()
     {
         var f = Db.One(
-            "SELECT f.FlightNumber, f.DepartureTime, f.Status, ac.Model, ac.TotalSeats, r.BaseFare, a.Code AS FromCode, b.Code AS ToCode " +
+            "SELECT f.FlightNumber, f.DepartureDateTime, f.Status, ac.Model, ac.TotalSeats, r.BaseFare, a.Code AS FromCode, b.Code AS ToCode " +
             "FROM Flight f JOIN Route r ON r.RouteID = f.RouteID JOIN Airport a ON a.AirportID = r.DepartureAirportID " +
             "JOIN Airport b ON b.AirportID = r.ArrivalAirportID JOIN Aircraft ac ON ac.AircraftID = f.AircraftID WHERE f.FlightID = @f",
-            r => new { Num = r.Str("FlightNumber"), Dep = r.Date("DepartureTime"), St = r.Str("Status"), M = r.Str("Model"), Seats = r.Int("TotalSeats"), Fare = r.Dec("BaseFare"), From = r.Str("FromCode"), To = r.Str("ToCode") },
+            r => new { Num = r.Str("FlightNumber"), Dep = r.Date("DepartureDateTime"), St = r.Str("Status"), M = r.Str("Model"), Seats = r.Int("TotalSeats"), Fare = r.Dec("BaseFare"), From = r.Str("FromCode"), To = r.Str("ToCode") },
             ("@f", Id));
         if (f == null || f.St == "cancelled" || f.Dep <= DateTime.Now)
         {

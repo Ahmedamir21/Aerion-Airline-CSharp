@@ -13,10 +13,10 @@ public class FlightStatusModel : AppPage
     public void OnGet()
     {
         Flights = Db.Query(
-            "SELECT TOP 60 f.FlightID, f.FlightNumber, a.Code + ' → ' + b.Code AS Route, f.DepartureTime, f.Status FROM Flight f " +
+            "SELECT TOP 60 f.FlightID, f.FlightNumber, a.Code + ' → ' + b.Code AS Route, f.DepartureDateTime, f.Status FROM Flight f " +
             "JOIN Route r ON r.RouteID = f.RouteID JOIN Airport a ON a.AirportID = r.DepartureAirportID JOIN Airport b ON b.AirportID = r.ArrivalAirportID " +
-            "WHERE f.DepartureTime > DATEADD(day, -1, SYSDATETIME()) ORDER BY f.DepartureTime",
-            r => (r.Int("FlightID"), r.Str("FlightNumber"), r.Str("Route"), r.Date("DepartureTime"), r.Str("Status")));
+            "WHERE f.DepartureDateTime > DATEADD(day, -1, SYSDATETIME()) ORDER BY f.DepartureDateTime",
+            r => (r.Int("FlightID"), r.Str("FlightNumber"), r.Str("Route"), r.Date("DepartureDateTime"), r.Str("Status")));
         if (List != null)
         {
             Passengers = Db.Query(

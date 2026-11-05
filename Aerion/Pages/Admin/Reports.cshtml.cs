@@ -22,10 +22,10 @@ public class ReportsModel : AppPage
             r => (r.Str("Route"), r.Int("Sold"), r.Dec("Revenue")));
         // How full each flight is.
         Fill = Db.Query(
-            "SELECT TOP 40 f.FlightNumber, a.Code + ' → ' + b.Code AS Route, f.DepartureTime, COUNT(s.SeatID) AS Total, SUM(CASE WHEN s.IsAvailable = 0 THEN 1 ELSE 0 END) AS Sold " +
+            "SELECT TOP 40 f.FlightNumber, a.Code + ' → ' + b.Code AS Route, f.DepartureDateTime, COUNT(s.SeatID) AS Total, SUM(CASE WHEN s.IsAvailable = 0 THEN 1 ELSE 0 END) AS Sold " +
             "FROM Flight f JOIN Route r ON r.RouteID = f.RouteID JOIN Airport a ON a.AirportID = r.DepartureAirportID JOIN Airport b ON b.AirportID = r.ArrivalAirportID " +
-            "JOIN Seat s ON s.FlightID = f.FlightID GROUP BY f.FlightNumber, a.Code, b.Code, f.DepartureTime ORDER BY 100.0 * SUM(CASE WHEN s.IsAvailable = 0 THEN 1 ELSE 0 END) / COUNT(s.SeatID) DESC",
-            r => (r.Str("FlightNumber"), r.Str("Route"), r.Date("DepartureTime"), r.Int("Total"), r.Int("Sold"), r.Int("Total") == 0 ? 0 : 100.0 * r.Int("Sold") / r.Int("Total")));
+            "JOIN Seat s ON s.FlightID = f.FlightID GROUP BY f.FlightNumber, a.Code, b.Code, f.DepartureDateTime ORDER BY 100.0 * SUM(CASE WHEN s.IsAvailable = 0 THEN 1 ELSE 0 END) / COUNT(s.SeatID) DESC",
+            r => (r.Str("FlightNumber"), r.Str("Route"), r.Date("DepartureDateTime"), r.Int("Total"), r.Int("Sold"), r.Int("Total") == 0 ? 0 : 100.0 * r.Int("Sold") / r.Int("Total")));
         TotalRevenue = ByRoute.Sum(x => x.Revenue);
         Bookings = Db.Int("SELECT COUNT(*) FROM Booking WHERE Status = 'confirmed'");
         Cancelled = Db.Int("SELECT COUNT(*) FROM Booking WHERE Status = 'cancelled'");

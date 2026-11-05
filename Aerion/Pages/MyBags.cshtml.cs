@@ -24,7 +24,7 @@ public class MyBagsModel : AppPage
         Bags = Db.Query(
             "SELECT g.BaggageID, g.TagNumber, g.Status, g.CurrentLocation, f.FlightNumber, ISNULL(t.SeatNumber, '-') AS Seat " +
             "FROM Baggage g JOIN Ticket t ON t.TicketID = g.TicketID JOIN Booking b ON b.BookingID = t.BookingID " +
-            "JOIN Flight f ON f.FlightID = t.FlightID WHERE b.PassengerID = @p AND t.Status <> 'cancelled' ORDER BY f.DepartureTime",
+            "JOIN Flight f ON f.FlightID = t.FlightID WHERE b.PassengerID = @p AND t.Status <> 'cancelled' ORDER BY f.DepartureDateTime",
             r => new BagRow { Id = r.Int("BaggageID"), Tag = r.Str("TagNumber"), Status = r.Str("Status"), Flight = r.Str("FlightNumber"), Seat = r.Str("Seat"), Location = r.NStr("CurrentLocation") },
             ("@p", PassengerId));
     }

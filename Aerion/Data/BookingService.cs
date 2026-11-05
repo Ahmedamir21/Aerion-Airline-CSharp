@@ -1,6 +1,6 @@
 namespace Aerion.Data;
 
-public record FareInfo(string Name, decimal PriceMultiplier, decimal MilesMultiplier);
+public record FareInfo(string Name, decimal PriceMultiplier, decimal MilesRate);
 
 public record BookResult(bool Ok, string Message, int BookingId = 0);
 
@@ -22,8 +22,8 @@ public class BookingService
     public Dictionary<string, FareInfo> FareClasses()
     {
         var list = _db.Query(
-            "SELECT Name, PriceMultiplier, MilesMultiplier FROM FareClass",
-            r => new FareInfo(r.Str("Name"), r.Dec("PriceMultiplier"), r.Dec("MilesMultiplier")));
+            "SELECT ClassName, PriceMultiplier, MilesRate FROM FareClass",
+            r => new FareInfo(r.Str("ClassName"), r.Dec("PriceMultiplier"), r.Dec("MilesRate")));
         return list.ToDictionary(f => f.Name);
     }
 
@@ -45,9 +45,9 @@ public class BookingService
             return _db.InTransaction(tx =>
             {
                 var flight = tx.Query(
-                    "SELECT f.Status, f.DepartureTime, r.BaseFare, r.DistanceKm " +
+                    "SELECT f.Status, f.DepartureDateTime, r.BaseFare, r.DistanceKm " +
                     "FROM Flight f JOIN Route r ON r.RouteID = f.RouteID WHERE f.FlightID = @f",
-                    r => new { Status = r.Str("Status"), Dep = r.Date("DepartureTime"), Fare = r.Dec("BaseFare"), Km = r.Int("DistanceKm") },
+                    r => new { Status = r.Str("Status"), Dep = r.Date("DepartureDateTime"), Fare = r.Dec("BaseFare"), Km = r.Int("DistanceKm") },
                     ("@f", flightId)).FirstOrDefault();
                 if (flight == null) return new BookResult(false, "Flight not found.");
                 if (flight.Status == "cancelled" || flight.Dep <= DateTime.Now)
@@ -76,9 +76,9 @@ public class BookingService
                     if (taken != 1) throw new InvalidOperationException("Seat " + seat + " is no longer available.");
 
                     var fare = tx.Query(
-                        "SELECT fc.PriceMultiplier, fc.MilesMultiplier FROM Seat s " +
+                        "SELECT fc.PriceMultiplier, fc.MilesRate FROM Seat s " +
                         "JOIN FareClass fc ON fc.FareClassID = s.FareClassID WHERE s.FlightID = @f AND s.SeatNumber = @s",
-                        r => new { Price = r.Dec("PriceMultiplier"), Miles = r.Dec("MilesMultiplier") },
+                        r => new { Price = r.Dec("PriceMultiplier"), Miles = r.Dec("MilesRate") },
                         ("@f", flightId), ("@s", seat)).First();
 
                     decimal paid = Math.Round(flight.Fare * fare.Price * (1 - discount), 2);
@@ -135,9 +135,9 @@ public class BookingService
             return _db.InTransaction(tx =>
             {
                 var b = tx.Query(
-                    "SELECT b.PassengerID, b.Status, b.MilesEarned, b.MilesRedeemed, f.DepartureTime " +
+                    "SELECT b.PassengerID, b.Status, b.MilesEarned, b.MilesRedeemed, f.DepartureDateTime " +
                     "FROM Booking b JOIN Flight f ON f.FlightID = b.FlightID WHERE b.BookingID = @b",
-                    r => new { Pid = r.Int("PassengerID"), Status = r.Str("Status"), Earned = r.Int("MilesEarned"), Redeemed = r.Int("MilesRedeemed"), Dep = r.Date("DepartureTime") },
+                    r => new { Pid = r.Int("PassengerID"), Status = r.Str("Status"), Earned = r.Int("MilesEarned"), Redeemed = r.Int("MilesRedeemed"), Dep = r.Date("DepartureDateTime") },
                     ("@b", bookingId)).FirstOrDefault();
                 if (b == null || (onlyPassengerId != null && b.Pid != onlyPassengerId))
                     return new BookResult(false, "Booking not found.");
@@ -179,12 +179,12 @@ public class BookingService
             return _db.InTransaction(tx =>
             {
                 var t = tx.Query(
-                    "SELECT t.FlightID, t.SeatNumber, t.Status, b.PassengerID, s.FareClassID, f.DepartureTime " +
+                    "SELECT t.FlightID, t.SeatNumber, t.Status, b.PassengerID, s.FareClassID, f.DepartureDateTime " +
                     "FROM Ticket t JOIN Booking b ON b.BookingID = t.BookingID " +
                     "JOIN Flight f ON f.FlightID = t.FlightID " +
                     "JOIN Seat s ON s.FlightID = t.FlightID AND s.SeatNumber = t.SeatNumber " +
                     "WHERE t.TicketID = @t",
-                    r => new { Flight = r.Int("FlightID"), Seat = r.Str("SeatNumber"), Status = r.Str("Status"), Pid = r.Int("PassengerID"), Fc = r.Int("FareClassID"), Dep = r.Date("DepartureTime") },
+                    r => new { Flight = r.Int("FlightID"), Seat = r.Str("SeatNumber"), Status = r.Str("Status"), Pid = r.Int("PassengerID"), Fc = r.Int("FareClassID"), Dep = r.Date("DepartureDateTime") },
                     ("@t", ticketId)).FirstOrDefault();
                 if (t == null || (onlyPassengerId != null && t.Pid != onlyPassengerId))
                     return new BookResult(false, "Ticket not found.");

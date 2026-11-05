@@ -36,12 +36,12 @@ public class IndexModel : AppPage
         // Search by booking number or by part of the passenger's name.
         int.TryParse(Q.Trim().TrimStart('#'), out int number);
         Rows = Db.Query(
-            "SELECT TOP 50 b.BookingID, t.TicketID, p.Name, f.FlightNumber, f.DepartureTime, ISNULL(t.SeatNumber,'-') AS Seat, t.Status, b.Status AS BStatus, " +
+            "SELECT TOP 50 b.BookingID, t.TicketID, p.Name, f.FlightNumber, f.DepartureDateTime, ISNULL(t.SeatNumber,'-') AS Seat, t.Status, b.Status AS BStatus, " +
             "g.BaggageID, g.TagNumber, g.Status AS BagStatus, g.CurrentLocation AS BagLocation " +
             "FROM Booking b JOIN Passenger p ON p.PassengerID = b.PassengerID JOIN Ticket t ON t.BookingID = b.BookingID " +
             "JOIN Flight f ON f.FlightID = b.FlightID LEFT JOIN Baggage g ON g.TicketID = t.TicketID " +
-            "WHERE b.BookingID = @n OR p.Name LIKE @like ORDER BY f.DepartureTime DESC",
-            r => new TicketRow { BookingId = r.Int("BookingID"), TicketId = r.Int("TicketID"), Passenger = r.Str("Name"), Flight = r.Str("FlightNumber"), Dep = r.Date("DepartureTime"), Seat = r.Str("Seat"), Status = r.Str("Status"), BookingStatus = r.Str("BStatus"), BagId = r.NInt("BaggageID"), BagTag = r.NStr("TagNumber"), BagStatus = r.NStr("BagStatus"), BagLocation = r.NStr("BagLocation") },
+            "WHERE b.BookingID = @n OR p.Name LIKE @like ORDER BY f.DepartureDateTime DESC",
+            r => new TicketRow { BookingId = r.Int("BookingID"), TicketId = r.Int("TicketID"), Passenger = r.Str("Name"), Flight = r.Str("FlightNumber"), Dep = r.Date("DepartureDateTime"), Seat = r.Str("Seat"), Status = r.Str("Status"), BookingStatus = r.Str("BStatus"), BagId = r.NInt("BaggageID"), BagTag = r.NStr("TagNumber"), BagStatus = r.NStr("BagStatus"), BagLocation = r.NStr("BagLocation") },
             ("@n", number), ("@like", "%" + Q.Trim() + "%"));
     }
 
