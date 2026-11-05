@@ -1,5 +1,6 @@
 @{
     string? role = Context.Session.GetString("role");
+    bool hasProfile = Context.Session.GetInt32("pid") != null;
     string? message = (string?)TempData["err"] ?? (string?)TempData["ok"];
     string kind = TempData["err"] != null ? "error" : "success";
 }
@@ -33,11 +34,20 @@
                         <li><a asp-page="/Admin/Index">Dashboard</a></li>
                         <li><a asp-page="/Admin/Users">Users</a></li>
                         <li><a asp-page="/Admin/Reports">Reports</a></li>
+                        <li><a asp-page="@(hasProfile ? "/MyBookings" : "/PassengerProfile")">@(hasProfile ? "My trips" : "Fly with us")</a></li>
                         break;
                     case "staff":
                         <li><a asp-page="/Staff/Index">Counter</a></li>
                         <li><a asp-page="/Staff/FlightStatus">Flight status</a></li>
-                        <li><a asp-page="/Search">Book for passenger</a></li>
+                        <li><a asp-page="/Search">@(hasProfile ? "Book a flight" : "Book for passenger")</a></li>
+                        @if (hasProfile)
+                        {
+                            <li><a asp-page="/MyBookings">My trips</a></li>
+                        }
+                        else
+                        {
+                            <li><a asp-page="/PassengerProfile">Fly with us</a></li>
+                        }
                         break;
                     case "passenger":
                         <li><a asp-page="/Search">Search flights</a></li>

@@ -10,15 +10,33 @@
     var confirmButton = document.getElementById('confirm');
     var milesSelect = document.getElementById('miles-units');
     var perUnit = window.aerionDiscountPerUnit || 0;
+    var staffPercent = window.aerionStaffDiscount || 0;
+    var bookingFor = document.getElementById('booking-for');
+    var counterBox = document.getElementById('counter-box');
+    var selfBox = document.getElementById('self-box');
     var picked = {};
 
     function money(value) {
         return '$' + value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
+    // Counter sales for another passenger get no discount; everything else adds miles and staff percent.
+    function isCounterSale() {
+        return bookingFor ? bookingFor.value === 'other' : false;
+    }
+
     function discountedTotal(sum) {
+        if (isCounterSale()) return sum;
         var units = milesSelect ? parseInt(milesSelect.value || '0', 10) : 0;
-        return units ? sum * (1 - units * perUnit / 100) : sum;
+        return sum * (1 - (units * perUnit + staffPercent) / 100);
+    }
+
+    function applyMode() {
+        if (!bookingFor) return;
+        var counter = isCounterSale();
+        counterBox.hidden = !counter;
+        selfBox.hidden = counter;
+        render();
     }
 
     function render() {
@@ -54,6 +72,7 @@
     });
 
     if (milesSelect) milesSelect.addEventListener('change', render);
+    if (bookingFor) bookingFor.addEventListener('change', applyMode);
 
     document.querySelectorAll('.fare-card').forEach(function (card) {
         card.addEventListener('click', function () {

@@ -9,13 +9,17 @@ public class BookModel : AppPage
         _svc = svc;
     }
 
-    protected override string[] AllowedRoles => new[] { "passenger", "staff" };
+    protected override string[] AllowedRoles => SignedInRoles;
+
+    // Staff can still book at the counter without a passenger profile.
+    protected override bool RequiresPassengerProfile => Role != "staff";
 
     [BindProperty(SupportsGet = true)] public int Id { get; set; }
     [BindProperty] public string Seats { get; set; } = "";
     [BindProperty] public string Method { get; set; } = "card";
     [BindProperty] public int MilesUnits { get; set; }
     [BindProperty] public string? PassengerUsername { get; set; }
+    [BindProperty] public string BookingFor { get; set; } = "self";
 
     public string FlightNumber { get; set; } = "";
     public string RouteText { get; set; } = "";
@@ -28,7 +32,10 @@ public class BookModel : AppPage
     public HashSet<string> Taken { get; set; } = new();
     public int Miles { get; set; }
     public int MaxUnits { get; set; }
-    public bool IsStaff => Role == "staff";
+    public bool CanCounter => Role == "staff";
+    public bool HasProfile => PassengerId != null;
+    public bool CounterMode => CanCounter && (!HasProfile || BookingFor == "other");
+    public int StaffDiscount => Role is "staff" or "admin" ? BookingService.StaffDiscountPercent : 0;
 
     public IActionResult OnGet()
     {
@@ -39,7 +46,8 @@ public class BookModel : AppPage
     {
         var seats = Seats.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Distinct().ToList();
         int? passengerId = PassengerId;
-        if (IsStaff)
+        bool counter = CounterMode;
+        if (counter)
         {
             // Counter booking: the staff member books on behalf of an existing passenger.
             passengerId = Db.Query("SELECT p.PassengerID FROM Passenger p JOIN UserAccount u ON u.UserID = p.UserID WHERE u.Username = @u",
@@ -50,14 +58,15 @@ public class BookModel : AppPage
                 return RedirectToPage(new { Id });
             }
         }
-        var result = _svc.Book(Id, passengerId!.Value, seats, IsStaff ? "cash" : Method, IsStaff ? 0 : MilesUnits, EmployeeId);
+        var result = _svc.Book(Id, passengerId!.Value, seats, counter ? "cash" : Method, counter ? 0 : MilesUnits,
+            counter ? EmployeeId : null, staffDiscount: !counter && StaffDiscount > 0);
         if (!result.Ok)
         {
             Err(result.Message);
             return RedirectToPage(new { Id });
         }
         Ok(result.Message);
-        return RedirectToPage(IsStaff ? "/Staff/Index" : "/MyBookings");
+        return RedirectToPage(counter ? "/Staff/Index" : "/MyBookings");
     }
 
     private bool Load()

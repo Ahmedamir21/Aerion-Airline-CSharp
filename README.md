@@ -7,6 +7,7 @@ CSAI 202 database project. ASP.NET Core Razor Pages, C# and SQL Server through A
 ## Users
 - **Passenger**: sign up, log in, change password, search flights, pick a seat on the cabin map, pay, see and cancel bookings, change seat, see miles, track bags and report a lost bag.
 - **Staff**: find a booking by number or name, book at the counter for a passenger, check in, move a seat, register bags and mark them delayed or lost, set flight status, passenger list.
+- **Staff and admin as passengers**: they add their passport once (same login) and then get the passenger pages too, with a 10% staff discount that adds to the miles discount. A passenger account can never become an employee (SQL Server triggers in `Database/schema.sql`).
 - **Admin**: create staff and admin accounts, add or edit flights, routes, airports, aircraft, assign crew, set miles per class, booking history, reports (revenue by route, how full each flight is).
 
 Loyalty: every 40 miles gives 10% off (up to 30%). Business seats earn double miles and cost 2.8x the economy fare.

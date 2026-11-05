@@ -22,7 +22,8 @@ public class MyBookingsModel : AppPage
         _svc = svc;
     }
 
-    protected override string[] AllowedRoles => new[] { "passenger" };
+    protected override string[] AllowedRoles => SignedInRoles;
+    protected override bool RequiresPassengerProfile => true;
 
     public List<BookingRow> Upcoming { get; set; } = new();
     public List<BookingRow> Past { get; set; } = new();

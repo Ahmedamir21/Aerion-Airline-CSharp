@@ -13,7 +13,8 @@ public class MyBagsModel : AppPage
 {
     public MyBagsModel(Db db) : base(db) { }
 
-    protected override string[] AllowedRoles => new[] { "passenger" };
+    protected override string[] AllowedRoles => SignedInRoles;
+    protected override bool RequiresPassengerProfile => true;
 
     public List<BagRow> Bags { get; set; } = new();
 

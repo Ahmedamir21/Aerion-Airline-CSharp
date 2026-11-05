@@ -10,6 +10,7 @@ public class BookingService
     public const int MilesPerDiscount = 40;   // every 40 miles ...
     public const int DiscountPerUnit = 10;    // ... gives 10% off
     public const int MaxDiscountUnits = 3;    // up to 30%
+    public const int StaffDiscountPercent = 10; // staff and admins who fly as passengers
 
     private readonly Db _db;
 
@@ -32,7 +33,7 @@ public class BookingService
     }
 
     public BookResult Book(int flightId, int passengerId, List<string> seats, string method,
-        int milesUnits, int? employeeId)
+        int milesUnits, int? employeeId, bool staffDiscount = false)
     {
         if (seats.Count == 0) return new BookResult(false, "Select at least one seat.");
         if (seats.Count > 9) return new BookResult(false, "You can book up to 9 seats at once.");
@@ -55,13 +56,14 @@ public class BookingService
                 // Discount from loyalty miles (only valid for the passenger's own balance).
                 int balance = Convert.ToInt32(tx.Scalar("SELECT MilesBalance FROM LoyaltyAccount WITH (UPDLOCK, HOLDLOCK) WHERE PassengerID = @p", ("@p", passengerId)) ?? 0);
                 int units = Math.Max(0, Math.Min(milesUnits, Math.Min(MaxDiscountUnits, balance / MilesPerDiscount)));
-                decimal discount = units * DiscountPerUnit / 100m;
+                int discountPercent = units * DiscountPerUnit + (staffDiscount ? StaffDiscountPercent : 0);
+                decimal discount = discountPercent / 100m;
 
                 int bookingId = Convert.ToInt32(tx.Scalar(
                     "INSERT INTO Booking (PassengerID, FlightID, BookedByEmployeeID, DiscountPercent, MilesRedeemed) " +
                     "OUTPUT INSERTED.BookingID VALUES (@p, @f, @e, @d, @m)",
                     ("@p", passengerId), ("@f", flightId), ("@e", employeeId),
-                    ("@d", units * DiscountPerUnit), ("@m", units * MilesPerDiscount)));
+                    ("@d", discountPercent), ("@m", units * MilesPerDiscount)));
 
                 decimal total = 0;
                 int earned = 0;
@@ -108,9 +110,11 @@ public class BookingService
                     ("@d", earned - units * MilesPerDiscount), ("@l", loyaltyId));
                 tx.Execute("UPDATE Booking SET MilesEarned = @e WHERE BookingID = @b", ("@e", earned), ("@b", bookingId));
 
-                string note = units > 0 ? $" ({units * DiscountPerUnit}% miles discount applied)" : "";
+                string note = discountPercent > 0 ? $" ({discountPercent}% discount applied)" : "";
+                int newBalance = balance + earned - units * MilesPerDiscount;
+                string miles = $" Miles: used {units * MilesPerDiscount}, earned {earned}, balance {newBalance}.";
                 return new BookResult(true,
-                    $"Booking {bookingId} confirmed: seat{(seats.Count > 1 ? "s" : "")} {string.Join(", ", seats)}. Total ${total:N2}{note}.",
+                    $"Booking {bookingId} confirmed: seat{(seats.Count > 1 ? "s" : "")} {string.Join(", ", seats)}. Total ${total:N2}{note}.{miles}",
                     bookingId);
             });
         }

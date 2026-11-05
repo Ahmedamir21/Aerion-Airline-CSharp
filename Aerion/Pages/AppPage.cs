@@ -18,6 +18,12 @@ public abstract class AppPage : PageModel
     // Empty = public page. Otherwise only these roles may open it.
     protected virtual string[] AllowedRoles => Array.Empty<string>();
 
+    // Everyone who can sign in. Staff and admins may also use the passenger pages.
+    protected static readonly string[] SignedInRoles = { "passenger", "staff", "admin" };
+
+    // Passenger pages need a passenger profile. Passengers always have one, employees add it once.
+    protected virtual bool RequiresPassengerProfile => false;
+
     public override void OnPageHandlerExecuting(PageHandlerExecutingContext context)
     {
         if (AllowedRoles.Length > 0 && (Role == null || !AllowedRoles.Contains(Role)))
@@ -32,6 +38,11 @@ public abstract class AppPage : PageModel
                 TempData["err"] = "You do not have access to that page.";
                 context.Result = RedirectToPage("/Index");
             }
+            return;
+        }
+        if (RequiresPassengerProfile && PassengerId == null)
+        {
+            context.Result = RedirectToPage("/PassengerProfile");
             return;
         }
         base.OnPageHandlerExecuting(context);

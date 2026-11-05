@@ -4,7 +4,8 @@ public class AccountModel : AppPage
 {
     public AccountModel(Db db) : base(db) { }
 
-    protected override string[] AllowedRoles => new[] { "passenger" };
+    protected override string[] AllowedRoles => SignedInRoles;
+    protected override bool RequiresPassengerProfile => true;
 
     public int Balance { get; set; }
     public List<(DateTime When, int Miles, string Reason)> History { get; set; } = new();

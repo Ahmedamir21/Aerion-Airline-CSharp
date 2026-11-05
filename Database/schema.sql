@@ -147,3 +147,18 @@ CREATE TABLE LoyaltyTransaction (
 GO
 CREATE UNIQUE INDEX UX_Ticket_Seat ON Ticket(FlightID, SeatNumber) WHERE SeatNumber IS NOT NULL;
 GO
+
+-- Role rules: an employee (staff or admin) may also be a passenger on the same account,
+-- but a passenger account can never become an employee.
+CREATE TRIGGER TR_Employee_Role ON Employee AFTER INSERT, UPDATE AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM inserted i JOIN UserAccount u ON u.UserID = i.UserID WHERE u.Role = 'passenger')
+        THROW 50001, 'A passenger account cannot be an employee.', 1;
+END;
+GO
+CREATE TRIGGER TR_UserAccount_PassengerRole ON UserAccount AFTER UPDATE AS
+BEGIN
+    IF UPDATE(Role) AND EXISTS (SELECT 1 FROM inserted i JOIN Employee e ON e.UserID = i.UserID WHERE i.Role = 'passenger')
+        THROW 50002, 'An employee account cannot be changed to a passenger account.', 1;
+END;
+GO

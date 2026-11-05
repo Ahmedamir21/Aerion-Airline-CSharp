@@ -81,16 +81,36 @@
                 <input type="hidden" asp-for="Seats" id="seats-field" />
                 <ul id="sel-list" class="sel-list"><li class="muted">No seats selected yet</li></ul>
                 <p class="total-line">Total <strong id="sel-total">$0.00</strong></p>
-                @if (Model.IsStaff)
+                @if (Model.CanCounter)
                 {
-                    <div class="form-group">
-                        <label for="pu">Passenger username</label>
-                        <input asp-for="PassengerUsername" id="pu" required placeholder="e.g. passenger1" />
+                    @if (Model.HasProfile)
+                    {
+                        <div class="form-group">
+                            <label for="booking-for">Booking for</label>
+                            <select asp-for="BookingFor" id="booking-for">
+                                <option value="self">Myself (staff discount @Model.StaffDiscount%)</option>
+                                <option value="other">A passenger at the counter</option>
+                            </select>
+                        </div>
+                    }
+                    else
+                    {
+                        <input type="hidden" name="BookingFor" value="other" />
+                        <p class="muted">Counter booking. To fly yourself with @Model.StaffDiscount% off, <a asp-page="/PassengerProfile">add your passport details</a>.</p>
+                    }
+                    <div id="counter-box" hidden="@Model.HasProfile">
+                        <div class="form-group">
+                            <label for="pu">Passenger username</label>
+                            <input asp-for="PassengerUsername" id="pu" placeholder="e.g. passenger1" />
+                        </div>
+                        <p class="muted">Counter booking: paid in cash at the desk.</p>
                     </div>
-                    <p class="muted">Counter booking: paid in cash at the desk.</p>
                 }
-                else
-                {
+                <div id="self-box" hidden="@(Model.CanCounter && !Model.HasProfile)">
+                    @if (Model.StaffDiscount > 0)
+                    {
+                        <p class="muted">Staff discount: @Model.StaffDiscount% off every seat.</p>
+                    }
                     <div class="form-group">
                         <label for="payment-method">Payment method</label>
                         <select asp-for="Method" id="payment-method">
@@ -116,7 +136,7 @@
                             <small class="muted">Every @BookingService.MilesPerDiscount miles = @BookingService.DiscountPerUnit% off. Fly to earn more (business earns double).</small>
                         }
                     </div>
-                }
+                </div>
                 <button type="submit" class="btn-primary" id="confirm" disabled>Confirm booking</button>
             </form>
         </aside>
@@ -124,6 +144,6 @@
 </div>
 
 @section Scripts {
-    <script>window.aerionDiscountPerUnit = @BookingService.DiscountPerUnit;</script>
+    <script>window.aerionDiscountPerUnit = @BookingService.DiscountPerUnit; window.aerionStaffDiscount = @Model.StaffDiscount;</script>
     <script src="~/js/seatmap.js" asp-append-version="true"></script>
 }

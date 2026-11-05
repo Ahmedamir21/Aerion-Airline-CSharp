@@ -50,6 +50,10 @@ public class LoginModel : AppPage
             var e = Db.One("SELECT EmployeeID, Name FROM Employee WHERE UserID = @u", r => new { Id = r.Int("EmployeeID"), Name = r.Str("Name") }, ("@u", user.Id))!;
             HttpContext.Session.SetInt32("eid", e.Id);
             HttpContext.Session.SetString("name", e.Name);
+
+            // Employees can also fly: use their passenger profile when they have one.
+            int? profileId = Db.Query("SELECT PassengerID FROM Passenger WHERE UserID = @u", r => (int?)r.Int("PassengerID"), ("@u", user.Id)).FirstOrDefault();
+            if (profileId != null) HttpContext.Session.SetInt32("pid", profileId.Value);
         }
 
         // Only local paths are allowed, so nobody can bounce a user to another site.

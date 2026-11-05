@@ -115,8 +115,14 @@ public static class Seeder
     {
         int uid = Convert.ToInt32(db.Scalar("INSERT INTO UserAccount (Username, PasswordHash, Role) OUTPUT INSERTED.UserID VALUES (@u,@p,'passenger')",
             ("@u", username), ("@p", Security.Hash(password))));
+        return AddPassengerProfile(db, uid, name, passport, miles);
+    }
+
+    // Passenger row and loyalty account for an existing login (also used by staff who fly).
+    public static int AddPassengerProfile(Db db, int userId, string name, string passport, int miles = 0)
+    {
         int pid = Convert.ToInt32(db.Scalar("INSERT INTO Passenger (UserID, Name, PassportNumber) OUTPUT INSERTED.PassengerID VALUES (@u,@n,@p)",
-            ("@u", uid), ("@n", name), ("@p", passport)));
+            ("@u", userId), ("@n", name), ("@p", passport)));
         db.Execute("INSERT INTO LoyaltyAccount (PassengerID, MilesBalance) VALUES (@p,@m)", ("@p", pid), ("@m", miles));
         return pid;
     }
