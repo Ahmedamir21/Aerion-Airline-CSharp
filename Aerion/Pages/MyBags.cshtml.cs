@@ -7,6 +7,7 @@ public class BagRow
     public string Flight { get; set; } = "";
     public string Seat { get; set; } = "";
     public string Status { get; set; } = "";
+    public string? Location { get; set; }
 }
 
 public class MyBagsModel : AppPage
@@ -21,10 +22,10 @@ public class MyBagsModel : AppPage
     public void OnGet()
     {
         Bags = Db.Query(
-            "SELECT g.BaggageID, g.TagNumber, g.Status, f.FlightNumber, ISNULL(t.SeatNumber, '-') AS Seat " +
+            "SELECT g.BaggageID, g.TagNumber, g.Status, g.CurrentLocation, f.FlightNumber, ISNULL(t.SeatNumber, '-') AS Seat " +
             "FROM Baggage g JOIN Ticket t ON t.TicketID = g.TicketID JOIN Booking b ON b.BookingID = t.BookingID " +
             "JOIN Flight f ON f.FlightID = t.FlightID WHERE b.PassengerID = @p AND t.Status <> 'cancelled' ORDER BY f.DepartureTime",
-            r => new BagRow { Id = r.Int("BaggageID"), Tag = r.Str("TagNumber"), Status = r.Str("Status"), Flight = r.Str("FlightNumber"), Seat = r.Str("Seat") },
+            r => new BagRow { Id = r.Int("BaggageID"), Tag = r.Str("TagNumber"), Status = r.Str("Status"), Flight = r.Str("FlightNumber"), Seat = r.Str("Seat"), Location = r.NStr("CurrentLocation") },
             ("@p", PassengerId));
     }
 

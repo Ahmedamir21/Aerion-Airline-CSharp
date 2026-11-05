@@ -48,10 +48,12 @@
                                 <input type="hidden" name="bagId" value="@r.BagId" /><input type="hidden" name="q" value="@Model.Q" />
                                 <span>@r.BagTag</span>
                                 <input name="weight" size="4" placeholder="kg" aria-label="Weight in kg" />
+                                <input name="location" size="10" maxlength="100" placeholder="location" aria-label="Bag location" />
                                 <select name="status" aria-label="Bag status"><option>checked in</option><option>loaded</option><option>delayed</option><option>lost</option><option>delivered</option></select>
                                 <button type="submit" class="btn-small">Save</button>
                             </form>
                             <span class="status-badge status-scheduled">@r.BagStatus</span>
+                            @if (!string.IsNullOrEmpty(r.BagLocation)) { <small class="muted">@r.BagLocation</small> }
                         }
                     </td>
                 </tr>

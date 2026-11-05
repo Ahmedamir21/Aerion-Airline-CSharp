@@ -13,6 +13,7 @@ public class TicketRow
     public int? BagId { get; set; }
     public string? BagTag { get; set; }
     public string? BagStatus { get; set; }
+    public string? BagLocation { get; set; }
 }
 
 public class IndexModel : AppPage
@@ -36,11 +37,11 @@ public class IndexModel : AppPage
         int.TryParse(Q.Trim().TrimStart('#'), out int number);
         Rows = Db.Query(
             "SELECT TOP 50 b.BookingID, t.TicketID, p.Name, f.FlightNumber, f.DepartureTime, ISNULL(t.SeatNumber,'-') AS Seat, t.Status, b.Status AS BStatus, " +
-            "g.BaggageID, g.TagNumber, g.Status AS BagStatus " +
+            "g.BaggageID, g.TagNumber, g.Status AS BagStatus, g.CurrentLocation AS BagLocation " +
             "FROM Booking b JOIN Passenger p ON p.PassengerID = b.PassengerID JOIN Ticket t ON t.BookingID = b.BookingID " +
             "JOIN Flight f ON f.FlightID = b.FlightID LEFT JOIN Baggage g ON g.TicketID = t.TicketID " +
             "WHERE b.BookingID = @n OR p.Name LIKE @like ORDER BY f.DepartureTime DESC",
-            r => new TicketRow { BookingId = r.Int("BookingID"), TicketId = r.Int("TicketID"), Passenger = r.Str("Name"), Flight = r.Str("FlightNumber"), Dep = r.Date("DepartureTime"), Seat = r.Str("Seat"), Status = r.Str("Status"), BookingStatus = r.Str("BStatus"), BagId = r.NInt("BaggageID"), BagTag = r.NStr("TagNumber"), BagStatus = r.NStr("BagStatus") },
+            r => new TicketRow { BookingId = r.Int("BookingID"), TicketId = r.Int("TicketID"), Passenger = r.Str("Name"), Flight = r.Str("FlightNumber"), Dep = r.Date("DepartureTime"), Seat = r.Str("Seat"), Status = r.Str("Status"), BookingStatus = r.Str("BStatus"), BagId = r.NInt("BaggageID"), BagTag = r.NStr("TagNumber"), BagStatus = r.NStr("BagStatus"), BagLocation = r.NStr("BagLocation") },
             ("@n", number), ("@like", "%" + Q.Trim() + "%"));
     }
 
@@ -65,13 +66,14 @@ public class IndexModel : AppPage
         return RedirectToPage(new { q });
     }
 
-    public IActionResult OnPostBag(int bagId, string status, decimal? weight, string q)
+    public IActionResult OnPostBag(int bagId, string status, decimal? weight, string? location, string q)
     {
         string[] allowed = { "checked in", "loaded", "delayed", "lost", "delivered" };
         if (!allowed.Contains(status)) { Err("Choose a valid bag status."); return RedirectToPage(new { q }); }
         // Registering the weight happens at check-in; later this form marks delayed or lost.
-        Db.Execute("UPDATE Baggage SET Status = @s, WeightKg = CASE WHEN @w IS NULL THEN WeightKg ELSE @w END WHERE BaggageID = @b",
-            ("@s", status), ("@w", weight), ("@b", bagId));
+        Db.Execute("UPDATE Baggage SET Status = @s, WeightKg = CASE WHEN @w IS NULL THEN WeightKg ELSE @w END, " +
+            "CurrentLocation = CASE WHEN @l IS NULL THEN CurrentLocation ELSE @l END WHERE BaggageID = @b",
+            ("@s", status), ("@w", weight), ("@l", string.IsNullOrWhiteSpace(location) ? null : location.Trim()), ("@b", bagId));
         Ok("Bag updated.");
         return RedirectToPage(new { q });
     }

@@ -128,7 +128,8 @@ CREATE TABLE Baggage (
     TagNumber NVARCHAR(20) NOT NULL UNIQUE,
     WeightKg  DECIMAL(5,1) NOT NULL DEFAULT 0,
     Status    NVARCHAR(20) NOT NULL DEFAULT 'not checked in'
-              CHECK (Status IN ('not checked in','checked in','loaded','delayed','lost','delivered'))
+              CHECK (Status IN ('not checked in','checked in','loaded','delayed','lost','delivered')),
+    CurrentLocation NVARCHAR(100) NULL
 );
 
 CREATE TABLE LoyaltyAccount (
